@@ -76,5 +76,11 @@
     <None Include="shaders\simple.vert">
       <Filter>shaders</Filter>
     </None>
+    <None Include="..\bin\shaders\phong.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\phong.frag">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

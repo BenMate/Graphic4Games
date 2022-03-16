@@ -1,15 +1,15 @@
+#include <iostream>
+#include <imgui.h>
+
 #include "GraphicsApp.h"
 #include "Gizmos.h"
 #include "Input.h"
 #include "Planet.h"
 #include "OBJMesh.h"
-
+#include "Mesh.h"
 
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
-
-
-
 
 using glm::vec3;
 using glm::vec4;
@@ -40,6 +40,11 @@ bool GraphicsApp::startup()
 	m_viewMatrix = glm::lookAt(vec3(10), vec3(0), vec3(0, 1, 0));
 	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, 16.0f / 9.0f, 0.1f, 1000.0f);
 
+	//start the scene with a default lighting.
+	m_light.colour = { 1, 1, 1 };
+	m_light.direction = { 1, -1, 1 };
+	m_ambientLight = { 0.25f, 0.25f, 0.25f };
+
 	//create a new solarSystem
 	if (havePlanets) m_solarSystem = new SolarSystem();
 
@@ -48,14 +53,12 @@ bool GraphicsApp::startup()
 
 void GraphicsApp::shutdown()
 {
-
 	Gizmos::destroy();
 	if (havePlanets) m_solarSystem->~SolarSystem();
 }
 
 void GraphicsApp::update(float deltaTime)
 {
-
 	// wipe the gizmos clean for this frame
 	Gizmos::clear();
 
@@ -75,15 +78,26 @@ void GraphicsApp::update(float deltaTime)
 	// add a transform so that we can see the axis
 	Gizmos::addTransform(mat4(1));
 
+	// Grab the time since the application started
+
+	//float time = getTime();
+    // Rotate the light
+	//m_light.direction = glm::normalize(glm::vec3(glm::cos(time * 2), glm::sin(time * 2), 0)); */
+
+
 	// quit if we press escape
 	aie::Input* input = aie::Input::getInstance();
 
 	if (input->isKeyDown(aie::INPUT_KEY_ESCAPE))
 		quit();
 
-	//update solarsystem
-	if (havePlanets) m_solarSystem->Update(deltaTime);
+	ImGui::Begin("Light Settings");
+	ImGui::DragFloat3("Global Light Direction", &m_light.direction[0], 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat3("Global Light colour", &m_light.colour[0], 0.1, 0.0f, 2.0f);
+	ImGui::End();
 
+	//update solarSystem
+	if (havePlanets) m_solarSystem->Update(deltaTime);
 
 	CamControls(deltaTime);
 }
@@ -97,33 +111,60 @@ void GraphicsApp::draw()
 	//draw the solar system
 	if (havePlanets) m_solarSystem->Draw();
 
-	// update perspective based on screen size
 	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, getWindowWidth() / (float)getWindowHeight(), 0.1f, 1000.0f);
 
 	//bind the shader
-	m_shader.bind();
+	m_phongShader.bind();
+
+	m_modelTransform = m_bunnyTransform;
+
+	m_phongShader.bindUniform("AmbientColour", m_ambientLight);
+	m_phongShader.bindUniform("LightColour", m_light.colour);
+	m_phongShader.bindUniform("LightDirection", m_light.direction);
+
+	m_phongShader.bindUniform("CameraPosition", glm::vec3(glm::inverse(m_viewMatrix)[3]));
 
 	//bind the transform
-	auto pvm = m_projectionMatrix * m_viewMatrix * m_pyromidTransform;
-	m_shader.bindUniform("ProjectionViewModel", pvm);
+	auto pvm = m_projectionMatrix * m_viewMatrix * m_modelTransform;
+	m_phongShader.bindUniform("ProjectionViewModel", pvm);
+	m_phongShader.bindUniform("ModelMatrix", m_modelTransform);
 
-	//draw the quad
-	//m_quadMesh.Draw();
-	//m_boxMesh.Draw();
-	m_pyromidMesh.Draw();
+	//draw the bunny
+	m_bunnyMesh.draw();
+
+	//bind the phong shader
+	m_phongShader.bind();
+
+	m_modelTransform = m_quadTransform;
+
+	pvm = m_projectionMatrix * m_viewMatrix * m_modelTransform;
+	////simple binding for lighting data based on model used
+	m_phongShader.bindUniform("ProjectionViewModel", pvm);
+	m_phongShader.bindUniform("ModelMatrix", m_modelTransform);
+
+	////draw quad
+	m_quadMesh.Draw();
 
 	Gizmos::draw(m_projectionMatrix * m_viewMatrix);
 }
 
 bool GraphicsApp::LaunchShaders()
 {
-	m_shader.loadShader(aie::eShaderStage::VERTEX,
+	//simple shader
+	/*m_shader.loadShader(aie::eShaderStage::VERTEX,
 		"./shaders/simple.vert");
 	m_shader.loadShader(aie::eShaderStage::FRAGMENT,
 		"./shaders/simple.frag");
-
 	if (m_shader.link() == false)
-		printf("simple Shader Error: %s\n", m_shader.getLastError());
+		printf("simple Shader Error: %s\n", m_shader.getLastError());*/
+
+	//phong shader
+	m_phongShader.loadShader(aie::eShaderStage::VERTEX,
+		"./shaders/phong.vert");
+	m_phongShader.loadShader(aie::eShaderStage::FRAGMENT,
+		"./shaders/phong.frag");
+	if (m_phongShader.link() == false)
+		printf("phong shader Error: %s\n", m_phongShader.getLastError());
 
 	Mesh::Vertex vertices[4];
 	vertices[0].position = { -0.5f, 0.2,  0.5, 1 };
@@ -131,10 +172,9 @@ bool GraphicsApp::LaunchShaders()
 	vertices[2].position = { -0.5f, 0.2, -0.5, 1 };
 	vertices[3].position = { 0.5f, 0.2, -0.5, 1 };
 
-	unsigned int indices[6] = { 0, 1 ,2
-								,2 ,1 ,3 };
+	unsigned int indices[6] = { 0, 1 ,2  ,2 ,1 ,3 };
 
-	m_quadMesh.Initialise(4, vertices, 6, indices);
+	m_quadMesh.InitialiseQuad();
 	m_quadTransform = { 10, 0, 0, 0,
 						0, 10, 0, 0,
 						0, 0, 10, 0,
@@ -150,9 +190,7 @@ bool GraphicsApp::LaunchShaders()
 						 0, 0.5, 0, 0,
 						 0, 0, 0.5, 0,
 						 0, 0, 0, 1 };
-
-
-	m_boxMesh.InitialiseBox();
+	/*m_boxMesh.InitialiseBox();
 	m_boxTransform = {   0.5, 0, 0, 0,
 						 0, 0.5, 0, 0,
 						 0, 0, 0.5, 0,
@@ -162,7 +200,7 @@ bool GraphicsApp::LaunchShaders()
 	m_pyromidTransform = { 1, 0, 0, 0,
 						   0, 1, 0, 0,
 						   0, 0, 1, 0,
-						   0, 0, 0, 1 };
+						   0, 0, 0, 1 };*/
 
 
 	return true;
@@ -204,6 +242,8 @@ void GraphicsApp::CamControls(float deltaTime)
 		m_position -= right * deltaTime * m_speed;
 
 	m_viewMatrix = glm::lookAt(vec3(cos(m_rotation), 1, sin(m_rotation)) * m_zoom + m_position, m_position, vec3(0, 1, 0));
+
+
 
 }
 

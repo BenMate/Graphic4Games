@@ -32,6 +32,9 @@ protected:
 
 	bool havePlanets = false;
 
+	glm::mat4 m_modelTransform;
+
+
 	// camera transforms
 	glm::mat4	m_viewMatrix;
 	glm::mat4	m_projectionMatrix;
@@ -40,6 +43,7 @@ protected:
 
 	//shader data
 	aie::ShaderProgram m_shader;
+	aie::ShaderProgram m_phongShader;
 
 	//generic quad data
 	Mesh m_quadMesh;
@@ -62,4 +66,13 @@ protected:
 	float m_rotation = 0.0f;
 	float m_rotSpeed = 45.f;
 	glm::vec3 m_position = glm::vec3(0);
+
+	struct Light
+	{
+		glm::vec3 direction;
+		glm::vec3 colour;
+	};
+
+	Light m_light;
+	glm::vec3 m_ambientLight;
 };
