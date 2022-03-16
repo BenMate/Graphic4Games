@@ -6,7 +6,10 @@
 #include "Shader.h"
 #include "Mesh.h"
 
+#include "OBJMesh.h"
+
 #include "SolarSystem.h"
+
 
 class SolarSystem;
 
@@ -25,6 +28,9 @@ public:
 protected:
 
 	bool LaunchShaders();
+	void CamControls(float deltaTime);
+
+	bool havePlanets = false;
 
 	// camera transforms
 	glm::mat4	m_viewMatrix;
@@ -32,9 +38,28 @@ protected:
 
 	SolarSystem* m_solarSystem;
 
+	//shader data
 	aie::ShaderProgram m_shader;
 
+	//generic quad data
 	Mesh m_quadMesh;
 	glm::mat4 m_quadTransform;
 
+	//standford bunny data
+	aie::OBJMesh m_bunnyMesh;
+	glm::mat4 m_bunnyTransform;
+
+	//box data
+	Mesh m_boxMesh;
+	glm::mat4 m_boxTransform;
+
+	//pyromid data
+	Mesh m_pyromidMesh;
+	glm::mat4 m_pyromidTransform;
+
+	float m_zoom = 10.0f;
+	float m_speed = 10.0f;
+	float m_rotation = 0.0f;
+	float m_rotSpeed = 45.f;
+	glm::vec3 m_position = glm::vec3(0);
 };
