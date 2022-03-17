@@ -11,7 +11,7 @@ uniform mat4 ProjectionViewModel;
 //this refers to the model matrix to be set in our transform normal
 uniform mat4 ModelMatrix;
 
-void main ()
+void main()
 {
     vPosition = ModelMatrix * Position;
     vNormal = (ModelMatrix * Normal).xyz;

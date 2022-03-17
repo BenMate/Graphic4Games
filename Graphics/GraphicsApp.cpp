@@ -46,7 +46,8 @@ bool GraphicsApp::startup()
 	m_ambientLight = { 0.25f, 0.25f, 0.25f };
 
 	//create a new solarSystem
-	if (havePlanets) m_solarSystem = new SolarSystem();
+	if (havePlanets) 
+		m_solarSystem = new SolarSystem();
 
 	return LaunchShaders();
 }
@@ -54,7 +55,8 @@ bool GraphicsApp::startup()
 void GraphicsApp::shutdown()
 {
 	Gizmos::destroy();
-	if (havePlanets) m_solarSystem->~SolarSystem();
+	if (havePlanets) 
+		m_solarSystem->~SolarSystem();
 }
 
 void GraphicsApp::update(float deltaTime)
@@ -109,7 +111,8 @@ void GraphicsApp::draw()
 	clearScreen();
 
 	//draw the solar system
-	if (havePlanets) m_solarSystem->Draw();
+	if (havePlanets) 
+		m_solarSystem->Draw();
 
 	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, getWindowWidth() / (float)getWindowHeight(), 0.1f, 1000.0f);
 
@@ -142,7 +145,7 @@ void GraphicsApp::draw()
 	m_phongShader.bindUniform("ProjectionViewModel", pvm);
 	m_phongShader.bindUniform("ModelMatrix", m_modelTransform);
 
-	////draw quad
+	//draw quad
 	m_quadMesh.Draw();
 
 	Gizmos::draw(m_projectionMatrix * m_viewMatrix);
@@ -151,12 +154,12 @@ void GraphicsApp::draw()
 bool GraphicsApp::LaunchShaders()
 {
 	//simple shader
-	/*m_shader.loadShader(aie::eShaderStage::VERTEX,
+	m_shader.loadShader(aie::eShaderStage::VERTEX,
 		"./shaders/simple.vert");
 	m_shader.loadShader(aie::eShaderStage::FRAGMENT,
 		"./shaders/simple.frag");
 	if (m_shader.link() == false)
-		printf("simple Shader Error: %s\n", m_shader.getLastError());*/
+		printf("simple Shader Error: %s\n", m_shader.getLastError());
 
 	//phong shader
 	m_phongShader.loadShader(aie::eShaderStage::VERTEX,
@@ -190,6 +193,7 @@ bool GraphicsApp::LaunchShaders()
 						 0, 0.5, 0, 0,
 						 0, 0, 0.5, 0,
 						 0, 0, 0, 1 };
+
 	/*m_boxMesh.InitialiseBox();
 	m_boxTransform = {   0.5, 0, 0, 0,
 						 0, 0.5, 0, 0,
