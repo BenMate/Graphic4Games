@@ -1,11 +1,13 @@
 #pragma once
-#include "Camera.h"
 #include <glm/glm.hpp>
+
+#include "Camera.h"
+#include "Input.h"
 
 class FlyCamera : public Camera
 {
 public:
-	virtual void Update();
+	virtual void Update(float deltaTime);
 	void SetSpeed(float speed) { m_speed = speed; };
 
 private:

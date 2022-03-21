@@ -10,6 +10,8 @@
 #include "OBJMesh.h"
 #include "Mesh.h"
 #include "Camera.h"
+#include "FlyCamera.h"
+
 
 using glm::vec3;
 using glm::vec4;
@@ -50,7 +52,8 @@ bool GraphicsApp::startup()
 		m_solarSystem = new SolarSystem();
 
 	//create camaera
-	m_camera = new Camera();
+	//m_camera = new Camera();
+	m_camera = new FlyCamera();
 
 	return LaunchShaders();
 }

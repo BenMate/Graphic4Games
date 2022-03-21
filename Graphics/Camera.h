@@ -25,8 +25,7 @@ public:
 	void SetPerspective(float fov, float aspectRatio, float near, float far);
 	void SetLookAt(glm::vec3 from, glm::vec3 to, glm::vec3 up);
 	
-private:
-	void UpdateProjectionViewTransform();
+protected:
 
 	glm::vec3 m_position = glm::vec3(-20.0f, 2.0f, 0.0f);
 
@@ -37,6 +36,9 @@ private:
 	float m_lastMouseY;
 
 	const float m_turnspeed = 0.05f;
+
+private:
+	void UpdateProjectionViewTransform();
 
 	glm::mat4 m_worldTransform;
 	glm::mat4 m_viewTransform;
