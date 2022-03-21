@@ -3,6 +3,7 @@
 #include "Application.h"
 #include <glm/mat4x4.hpp>
 
+#include "Texture.h"
 #include "Shader.h"
 #include "Mesh.h"
 #include "OBJMesh.h"
@@ -37,15 +38,24 @@ protected:
 
 
 	// camera transforms
-	glm::mat4	m_viewMatrix;
-	glm::mat4	m_projectionMatrix;
+	glm::mat4 m_viewMatrix;
+	glm::mat4 m_projectionMatrix;
 	Camera* m_camera;
 
 	SolarSystem* m_solarSystem;
 
+	//textures
+	aie::Texture m_gridTexture;
+	aie::Texture m_spearTexture;
+
 	//shader data
 	aie::ShaderProgram m_shader;
 	aie::ShaderProgram m_phongShader;
+	aie::ShaderProgram m_texturedShader;
+
+	//soulspear data
+	aie::OBJMesh m_spearMesh;
+	glm::mat4 m_spearTransform;
 
 	//generic quad data
 	Mesh m_quadMesh;
