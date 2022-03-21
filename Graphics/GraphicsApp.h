@@ -5,10 +5,11 @@
 
 #include "Shader.h"
 #include "Mesh.h"
-
 #include "OBJMesh.h"
 
 #include "SolarSystem.h"
+#include "Camera.h"
+
 
 
 class SolarSystem;
@@ -38,6 +39,7 @@ protected:
 	// camera transforms
 	glm::mat4	m_viewMatrix;
 	glm::mat4	m_projectionMatrix;
+	Camera* m_camera;
 
 	SolarSystem* m_solarSystem;
 

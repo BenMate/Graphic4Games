@@ -1,5 +1,7 @@
 #include <iostream>
 #include <imgui.h>
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
 
 #include "GraphicsApp.h"
 #include "Gizmos.h"
@@ -7,9 +9,7 @@
 #include "Planet.h"
 #include "OBJMesh.h"
 #include "Mesh.h"
-
-#include <glm/glm.hpp>
-#include <glm/ext.hpp>
+#include "Camera.h"
 
 using glm::vec3;
 using glm::vec4;
@@ -46,8 +46,11 @@ bool GraphicsApp::startup()
 	m_ambientLight = { 0.25f, 0.25f, 0.25f };
 
 	//create a new solarSystem
-	if (havePlanets) 
+	if (havePlanets)
 		m_solarSystem = new SolarSystem();
+
+	//create camaera
+	m_camera = new Camera();
 
 	return LaunchShaders();
 }
@@ -55,7 +58,7 @@ bool GraphicsApp::startup()
 void GraphicsApp::shutdown()
 {
 	Gizmos::destroy();
-	if (havePlanets) 
+	if (havePlanets)
 		m_solarSystem->~SolarSystem();
 }
 
@@ -81,9 +84,9 @@ void GraphicsApp::update(float deltaTime)
 	Gizmos::addTransform(mat4(1));
 
 	// Grab the time since the application started
-
 	//float time = getTime();
-    // Rotate the light
+
+	// Rotate the light
 	//m_light.direction = glm::normalize(glm::vec3(glm::cos(time * 2), glm::sin(time * 2), 0)); */
 
 
@@ -101,7 +104,10 @@ void GraphicsApp::update(float deltaTime)
 	//update solarSystem
 	if (havePlanets) m_solarSystem->Update(deltaTime);
 
-	CamControls(deltaTime);
+	//update camera
+	//temp camera controls
+	//CamControls(deltaTime);
+	m_camera->Update(deltaTime);
 }
 
 void GraphicsApp::draw()
@@ -111,24 +117,25 @@ void GraphicsApp::draw()
 	clearScreen();
 
 	//draw the solar system
-	if (havePlanets) 
+	if (havePlanets)
 		m_solarSystem->Draw();
 
-	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, getWindowWidth() / (float)getWindowHeight(), 0.1f, 1000.0f);
+	//m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, getWindowWidth() / (float)getWindowHeight(), 0.1f, 1000.0f);
+	glm::mat4 projectionMatrix = m_camera->GetProjectionMatrix(getWindowWidth(),
+		(float)getWindowHeight());
+	glm::mat4 viewMatrix = m_camera->GetViewMatrix();
 
 	//bind the shader
 	m_phongShader.bind();
-
 	m_modelTransform = m_bunnyTransform;
 
 	m_phongShader.bindUniform("AmbientColour", m_ambientLight);
 	m_phongShader.bindUniform("LightColour", m_light.colour);
 	m_phongShader.bindUniform("LightDirection", m_light.direction);
-
 	m_phongShader.bindUniform("CameraPosition", glm::vec3(glm::inverse(m_viewMatrix)[3]));
 
 	//bind the transform
-	auto pvm = m_projectionMatrix * m_viewMatrix * m_modelTransform;
+	auto pvm = projectionMatrix * viewMatrix * m_modelTransform;
 	m_phongShader.bindUniform("ProjectionViewModel", pvm);
 	m_phongShader.bindUniform("ModelMatrix", m_modelTransform);
 
@@ -140,7 +147,7 @@ void GraphicsApp::draw()
 
 	m_modelTransform = m_quadTransform;
 
-	pvm = m_projectionMatrix * m_viewMatrix * m_modelTransform;
+	pvm = projectionMatrix * viewMatrix * m_modelTransform;
 	////simple binding for lighting data based on model used
 	m_phongShader.bindUniform("ProjectionViewModel", pvm);
 	m_phongShader.bindUniform("ModelMatrix", m_modelTransform);
@@ -148,7 +155,8 @@ void GraphicsApp::draw()
 	//draw quad
 	m_quadMesh.Draw();
 
-	Gizmos::draw(m_projectionMatrix * m_viewMatrix);
+	Gizmos::draw(projectionMatrix * viewMatrix);
+
 }
 
 bool GraphicsApp::LaunchShaders()
