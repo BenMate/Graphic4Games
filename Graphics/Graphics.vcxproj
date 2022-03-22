@@ -167,10 +167,12 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="FlyCamera.cpp" />
     <ClCompile Include="GraphicsApp.cpp" />
+    <ClCompile Include="Instance.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="OBJMesh.cpp" />
     <ClCompile Include="Planet.cpp" />
+    <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="SolarSystem.cpp" />
   </ItemGroup>
@@ -178,9 +180,11 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="FlyCamera.h" />
     <ClInclude Include="GraphicsApp.h" />
+    <ClInclude Include="Instance.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="OBJMesh.h" />
     <ClInclude Include="Planet.h" />
+    <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="SolarSystem.h" />
     <ClInclude Include="tiny_obj_loader.h" />

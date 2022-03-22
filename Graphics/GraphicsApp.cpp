@@ -6,12 +6,9 @@
 #include "GraphicsApp.h"
 #include "Gizmos.h"
 #include "Input.h"
-#include "Planet.h"
-#include "OBJMesh.h"
-#include "Mesh.h"
-#include "Camera.h"
-#include "FlyCamera.h"
 
+#include "Instance.h"
+#include "Scene.h"
 
 using glm::vec3;
 using glm::vec4;
@@ -37,23 +34,35 @@ bool GraphicsApp::startup()
 
 	// initialise gizmo primitive counts
 	Gizmos::create(10000, 10000, 10000, 10000);
-
-	// create simple camera transforms
-	m_viewMatrix = glm::lookAt(vec3(10), vec3(0), vec3(0, 1, 0));
-	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, 16.0f / 9.0f, 0.1f, 1000.0f);
-
-	//start the scene with a default lighting.
-	m_light.colour = { 1, 1, 1 };
-	m_light.direction = { 1, -1, 1 };
-	m_ambientLight = { 0.25f, 0.25f, 0.25f };
-
 	//create a new solarSystem
 	if (havePlanets)
 		m_solarSystem = new SolarSystem();
 
 	//create camaera
-	//m_camera = new Camera();
 	m_camera = new FlyCamera();
+
+	// create simple camera transforms
+	m_viewMatrix = glm::lookAt(vec3(10), vec3(0), vec3(0, 1, 0));
+	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, 16.0f / 9.0f, 0.1f, 1000.0f);
+
+	
+
+	//start the scene with a default lighting.
+	Light light;
+	light.colour = { 1, 1, 1 };
+	light.direction = { 1, -1, 1 };
+	m_ambientLight = { 0.25f, 0.25f, 0.25f };
+
+
+
+	m_scene = new Scene(m_camera, glm::vec2(getWindowWidth(), getWindowHeight()),
+		light, m_ambientLight);
+
+	//add a point light into the scene
+	m_scene->AddPointLight(glm::vec3(5, 3, 0), glm::vec3(1, 0, 0), 50);
+	m_scene->AddPointLight(glm::vec3(-5, 3, 0), glm::vec3(0, 0, 1), 50);
+
+	m_scene->AddInstance(new Instance(m_spearTransform, &m_spearMesh, &m_normalMapShader));
 
 	return LaunchShaders();
 }
@@ -63,6 +72,8 @@ void GraphicsApp::shutdown()
 	Gizmos::destroy();
 	if (havePlanets)
 		m_solarSystem->~SolarSystem();
+
+	delete m_scene;
 }
 
 void GraphicsApp::update(float deltaTime)
@@ -99,11 +110,23 @@ void GraphicsApp::update(float deltaTime)
 	if (input->isKeyDown(aie::INPUT_KEY_ESCAPE))
 		quit();
 
+	//GUI
+
+	//todo: button to change camera + speed.
 	ImGui::Begin("Light Settings");
-	ImGui::DragFloat3("Global Light Direction", &m_light.direction[0], 0.1f, -1.0f, 1.0f);
-	ImGui::DragFloat3("Global Light colour", &m_light.colour[0], 0.1, 0.0f, 2.0f);
+	ImGui::DragFloat3("Global Light Direction", &m_scene->GetGlobalLight().direction[0], 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat3("Global Light colour", &m_scene->GetGlobalLight().colour[0], 0.1, 0.0f, 2.0f);
 	ImGui::End();
 
+	ImGui::Begin("PointLight Settings");
+
+	for (int i = 0; i < m_scene->GetNumLights(); i++)
+	{
+		ImGui::DragFloat3("Point Light Direction", &m_scene->GetPointLight()[i].direction[0], 0.1f, -1.0f, 1.0f);
+		ImGui::DragFloat3("Point Light colour", &m_scene->GetPointLight()[i].colour[0], 0.1, 0.0f, 2.0f);
+	}
+
+	ImGui::End();
 	//update solarSystem
 	if (havePlanets) m_solarSystem->Update(deltaTime);
 
@@ -125,28 +148,29 @@ void GraphicsApp::draw()
 		(float)getWindowHeight());
 	glm::mat4 viewMatrix = m_camera->GetViewMatrix();
 
+	//old ways
 #pragma region Bunny Draw
 	//bind the shader
-	m_phongShader.bind();
-	m_modelTransform = m_bunnyTransform;
+	//m_phongShader.bind();
+	//m_modelTransform = m_bunnyTransform;
 
-	m_phongShader.bindUniform("AmbientColour", m_ambientLight);
-	m_phongShader.bindUniform("LightColour", m_light.colour);
-	m_phongShader.bindUniform("LightDirection", m_light.direction);
-	m_phongShader.bindUniform("CameraPosition", glm::vec3(glm::inverse(m_viewMatrix)[3]));
+	//m_phongShader.bindUniform("AmbientColour", m_ambientLight);
+	//m_phongShader.bindUniform("LightColour", m_light.colour);
+	//m_phongShader.bindUniform("LightDirection", m_light.direction);
+	//m_phongShader.bindUniform("CameraPosition", glm::vec3(glm::inverse(m_viewMatrix)[3]));
 
-	//bind the transform
-	auto pvm = projectionMatrix * viewMatrix * m_modelTransform;
-	m_phongShader.bindUniform("ProjectionViewModel", pvm);
-	m_phongShader.bindUniform("ModelMatrix", m_modelTransform);
+	////bind the transform
+	//auto pvm = projectionMatrix * viewMatrix * m_modelTransform;
+	//m_phongShader.bindUniform("ProjectionViewModel", pvm);
+	//m_phongShader.bindUniform("ModelMatrix", m_modelTransform);
 
 	//draw the bunny
-	m_bunnyMesh.draw();
+	//m_bunnyMesh.draw();
 #pragma endregion
 
 #pragma region Gun Draw
 
-	m_normalMapShader.bind();
+	/*m_normalMapShader.bind();
 	m_modelTransform = m_gunTransform;
 
 	m_normalMapShader.bindUniform("AmbientColour", m_ambientLight);
@@ -158,44 +182,44 @@ void GraphicsApp::draw()
 	pvm = projectionMatrix * viewMatrix * m_modelTransform;
 	m_normalMapShader.bindUniform("ProjectionViewModel", pvm);
 	m_normalMapShader.bindUniform("ModelMatrix", m_modelTransform);
-	m_gunMesh.draw();
+	m_gunMesh.draw();*/
 
 #pragma endregion
 
 #pragma region Quad Draw
 	//bind the phong shader
-	m_texturedShader.bind();
-	m_modelTransform = m_quadTransform;
-	pvm = projectionMatrix * viewMatrix * m_modelTransform;
-	//simple binding for lighting data based on model used
-	m_texturedShader.bindUniform("ProjectionViewModel", pvm);
+	//m_texturedShader.bind();
+	//m_modelTransform = m_quadTransform;
+	//pvm = projectionMatrix * viewMatrix * m_modelTransform;
+	////simple binding for lighting data based on model used
+	//m_texturedShader.bindUniform("ProjectionViewModel", pvm);
 
-	//bind the texture at the location
-	m_texturedShader.bindUniform("diffuseTexture", 0);
-	//bind the texture to the specific location
-	m_gridTexture.bind(0);
-	//draw quad
-	m_quadMesh.Draw();
+	////bind the texture at the location
+	//m_texturedShader.bindUniform("diffuseTexture", 0);
+	////bind the texture to the specific location
+	//m_gridTexture.bind(0);
+	////draw quad
+	//m_quadMesh.Draw();
 #pragma endregion
 
 #pragma region Soul Spear Draw
-	m_normalMapShader.bind();
-	m_modelTransform = m_spearTransform;
-	
-	m_normalMapShader.bindUniform("AmbientColour", m_ambientLight);
-	m_normalMapShader.bindUniform("LightColour", m_light.colour);
-	m_normalMapShader.bindUniform("LightDirection", m_light.direction);
+	//m_normalMapShader.bind();
+	//m_modelTransform = m_spearTransform;
+	//
+	//m_normalMapShader.bindUniform("AmbientColour", m_ambientLight);
+	//m_normalMapShader.bindUniform("LightColour", m_light.colour);
+	//m_normalMapShader.bindUniform("LightDirection", m_light.direction);
 
-	m_normalMapShader.bindUniform("CameraPosition", m_camera->GetPosition());
+	//m_normalMapShader.bindUniform("CameraPosition", m_camera->GetPosition());
 
-	pvm = projectionMatrix * viewMatrix * m_modelTransform;
-	m_normalMapShader.bindUniform("ProjectionViewModel", pvm);
-	m_normalMapShader.bindUniform("ModelMatrix", m_modelTransform);
-
-
-	m_spearMesh.draw();
+	//pvm = projectionMatrix * viewMatrix * m_modelTransform;
+	//m_normalMapShader.bindUniform("ProjectionViewModel", pvm);
+	//m_normalMapShader.bindUniform("ModelMatrix", m_modelTransform);
+	//m_spearMesh.draw();
 #pragma endregion
+	//=========
 
+	m_scene->Draw();
 
 
 	Gizmos::draw(projectionMatrix * viewMatrix);
@@ -301,6 +325,16 @@ bool GraphicsApp::LaunchShaders()
 					   0, 0.3, 0, 0,
 					   0, 0, 0.3, 0,
 					   0, 0, 0, 1 };
+
+	for (int i = 0; i < 10; i++)
+	{
+		m_scene->AddInstance(new Instance(glm::vec3(i * 2, 0, 0),glm::vec3(0, 0, 0),
+			glm::vec3(1, 1, 1), &m_spearMesh, &m_normalMapShader));
+		m_scene->AddInstance(new Instance(glm::vec3(i * 4, 0, 0), glm::vec3(i * 20, 0, 0),
+			glm::vec3(1, 1, 1), &m_gunMesh, &m_normalMapShader));
+	}
+	
+
 
 	return true;
 }

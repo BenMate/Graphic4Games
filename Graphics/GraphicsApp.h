@@ -10,9 +10,9 @@
 
 #include "SolarSystem.h"
 #include "Camera.h"
+#include "FlyCamera.h"
 
-
-
+class Scene;
 class SolarSystem;
 
 class GraphicsApp : public aie::Application {
@@ -34,10 +34,13 @@ protected:
 
 	bool havePlanets = false;
 	
-
+	float m_zoom = 10.0f;
+	float m_speed = 10.0f;
+	float m_rotation = 0.0f;
+	float m_rotSpeed = 45.f;
+	glm::vec3 m_position = glm::vec3(0);
 
 	glm::mat4 m_modelTransform;
-
 
 	// camera transforms
 	glm::mat4 m_viewMatrix;
@@ -85,18 +88,9 @@ protected:
 	Mesh m_pyromidMesh;
 	glm::mat4 m_pyromidTransform;
 
-	float m_zoom = 10.0f;
-	float m_speed = 10.0f;
-	float m_rotation = 0.0f;
-	float m_rotSpeed = 45.f;
-	glm::vec3 m_position = glm::vec3(0);
-
-	struct Light
-	{
-		glm::vec3 direction;
-		glm::vec3 colour;
-	};
-
-	Light m_light;
+	//light data
 	glm::vec3 m_ambientLight;
+
+	//scene data
+	Scene* m_scene;
 };
