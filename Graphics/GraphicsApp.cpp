@@ -125,7 +125,7 @@ void GraphicsApp::draw()
 		(float)getWindowHeight());
 	glm::mat4 viewMatrix = m_camera->GetViewMatrix();
 
-    #pragma region Object Shaders
+#pragma region Bunny Draw
 	//bind the shader
 	m_phongShader.bind();
 	m_modelTransform = m_bunnyTransform;
@@ -142,16 +142,27 @@ void GraphicsApp::draw()
 
 	//draw the bunny
 	m_bunnyMesh.draw();
+#pragma endregion
 
-	//====================================================
-	// Soul Spear 
-	m_texturedShader.bind();
-	pvm = projectionMatrix * viewMatrix * m_spearTransform;
-	m_texturedShader.bindUniform("ProjectionViewModel", pvm);
+#pragma region Gun Draw
 
-	m_spearMesh.draw();
-	//=====================================================
+	m_normalMapShader.bind();
+	m_modelTransform = m_gunTransform;
 
+	m_normalMapShader.bindUniform("AmbientColour", m_ambientLight);
+	m_normalMapShader.bindUniform("LightColour", m_light.colour);
+	m_normalMapShader.bindUniform("LightDirection", m_light.direction);
+
+	m_normalMapShader.bindUniform("CameraPosition", m_camera->GetPosition());
+
+	pvm = projectionMatrix * viewMatrix * m_modelTransform;
+	m_normalMapShader.bindUniform("ProjectionViewModel", pvm);
+	m_normalMapShader.bindUniform("ModelMatrix", m_modelTransform);
+	m_gunMesh.draw();
+
+#pragma endregion
+
+#pragma region Quad Draw
 	//bind the phong shader
 	m_texturedShader.bind();
 	m_modelTransform = m_quadTransform;
@@ -167,12 +178,32 @@ void GraphicsApp::draw()
 	m_quadMesh.Draw();
 #pragma endregion
 
+#pragma region Soul Spear Draw
+	m_normalMapShader.bind();
+	m_modelTransform = m_spearTransform;
+	
+	m_normalMapShader.bindUniform("AmbientColour", m_ambientLight);
+	m_normalMapShader.bindUniform("LightColour", m_light.colour);
+	m_normalMapShader.bindUniform("LightDirection", m_light.direction);
+
+	m_normalMapShader.bindUniform("CameraPosition", m_camera->GetPosition());
+
+	pvm = projectionMatrix * viewMatrix * m_modelTransform;
+	m_normalMapShader.bindUniform("ProjectionViewModel", pvm);
+	m_normalMapShader.bindUniform("ModelMatrix", m_modelTransform);
+
+
+	m_spearMesh.draw();
+#pragma endregion
+
+
+
 	Gizmos::draw(projectionMatrix * viewMatrix);
 }
 
 bool GraphicsApp::LaunchShaders()
 {
- #pragma region Shaders
+#pragma region Simple Shaders
 	//simple shader
 	m_shader.loadShader(aie::eShaderStage::VERTEX,
 		"./shaders/simple.vert");
@@ -180,7 +211,9 @@ bool GraphicsApp::LaunchShaders()
 		"./shaders/simple.frag");
 	if (m_shader.link() == false)
 		printf("simple Shader Error: %s\n", m_shader.getLastError());
+#pragma endregion
 
+#pragma region Phongshader
 	//phong shader
 	m_phongShader.loadShader(aie::eShaderStage::VERTEX,
 		"./shaders/phong.vert");
@@ -188,13 +221,15 @@ bool GraphicsApp::LaunchShaders()
 		"./shaders/phong.frag");
 	if (m_phongShader.link() == false)
 		printf("phong shader Error: %s\n", m_phongShader.getLastError());
+#pragma endregion
 
+#pragma region TexturedShader
 	m_texturedShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/textured.vert");
 	m_texturedShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/textured.frag");
 
 	if (m_texturedShader.link() == false)
 	{
-		printf("Textured shader Error: s\n", m_texturedShader.getLastError());
+		printf("Textured shader Error: %s\n", m_texturedShader.getLastError());
 		return false;
 	}
 	if (m_gridTexture.load("./textures/numbered_grid.tga") == false)
@@ -202,6 +237,18 @@ bool GraphicsApp::LaunchShaders()
 		printf("failed to load the texture, please check file path\n");
 		return false;
 	}
+#pragma endregion
+
+#pragma region normalMapShader
+	m_normalMapShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/normalMap.vert");
+	m_normalMapShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/normalMap.frag");
+
+	if (m_normalMapShader.link() == false)
+	{
+		printf("normal map has a  shader error: %s\n", m_normalMapShader.getLastError());
+		return false;
+	}
+#pragma endregion
 
 	Mesh::Vertex vertices[4];
 	vertices[0].position = { -0.5f, 0.2,  0.5, 1 };
@@ -211,24 +258,22 @@ bool GraphicsApp::LaunchShaders()
 
 	unsigned int indices[6] = { 0, 1 ,2  ,2 ,1 ,3 };
 
-#pragma endregion
-
 	//quad
 	m_quadMesh.InitialiseQuad();
 	m_quadTransform = { 10, 0, 0, 0,
 						0, 10, 0, 0,
 						0, 0, 10, 0,
 						0, 0, 0, 1 }; //this is 10 units large
-
+	
 	//bunny
 	if (m_bunnyMesh.load("./stanford/bunny.obj") == false)
 	{
 		printf("Bunny mesh Error!\n");
 		return false;
 	}
-	m_bunnyTransform = { 0.5, 0, 0, 0,
-						 0, 0.5, 0, 0,
-						 0, 0, 0.5, 0,
+	m_bunnyTransform = { 0.1, 0, 0, 0,
+						 0, 0.1, 0, 0,
+						 0, 0, 0.1, 0,
 						 0, 0, 0, 1 };
 
 	//spear
@@ -238,10 +283,24 @@ bool GraphicsApp::LaunchShaders()
 		printf("SoulSpear mesh error!\n");
 		return false;
 	}
+	
+	//m_spearTexture.load("./soulspear/soulspear_diffuse.tga");
 	m_spearTransform = { 1, 0, 0, 0,
 						 0, 1, 0, 0,
 					     0, 0, 1, 0,
 					 	 0, 0, 0, 1 };
+
+	//gun
+	if (m_gunMesh.load("./gun/gun.obj", true, true) == false) 
+	{
+		printf("gun mesh error!\n");
+		return false;
+	}
+
+	m_gunTransform = { 0.3, 0, 0, 0,
+					   0, 0.3, 0, 0,
+					   0, 0, 0.3, 0,
+					   0, 0, 0, 1 };
 
 	return true;
 }

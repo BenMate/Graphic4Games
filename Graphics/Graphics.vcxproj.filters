@@ -22,6 +22,12 @@
     <Filter Include="Source Files\Provided">
       <UniqueIdentifier>{03d2830f-58d2-4535-9f69-afa1de93eaf5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Extension">
+      <UniqueIdentifier>{8120cf64-658d-493f-856c-edaf5d6f67e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Extentions">
+      <UniqueIdentifier>{ad5d65fb-9961-446c-82b3-fe1b09419445}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -31,9 +37,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Planet.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SolarSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="OBJMesh.cpp">
@@ -46,10 +49,13 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Extentions</Filter>
     </ClCompile>
     <ClCompile Include="FlyCamera.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Extentions</Filter>
+    </ClCompile>
+    <ClCompile Include="SolarSystem.cpp">
+      <Filter>Source Files\Extentions</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -57,9 +63,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Planet.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SolarSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Shader.h">
@@ -74,11 +77,14 @@
     <ClInclude Include="Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="SolarSystem.h">
+      <Filter>Header Files\Extension</Filter>
     </ClInclude>
     <ClInclude Include="FlyCamera.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Extension</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Header Files\Extension</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

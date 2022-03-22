@@ -33,6 +33,8 @@ protected:
 	void CamControls(float deltaTime);
 
 	bool havePlanets = false;
+	
+
 
 	glm::mat4 m_modelTransform;
 
@@ -40,6 +42,10 @@ protected:
 	// camera transforms
 	glm::mat4 m_viewMatrix;
 	glm::mat4 m_projectionMatrix;
+
+	//todo: make vectors of m_camera
+	//pushback new flyCamera etc.... make an index value 
+	//look in imgui for each camera etc...
 	Camera* m_camera;
 
 	SolarSystem* m_solarSystem;
@@ -47,15 +53,21 @@ protected:
 	//textures
 	aie::Texture m_gridTexture;
 	aie::Texture m_spearTexture;
+	aie::Texture m_gunTexture;
 
 	//shader data
 	aie::ShaderProgram m_shader;
 	aie::ShaderProgram m_phongShader;
 	aie::ShaderProgram m_texturedShader;
+	aie::ShaderProgram m_normalMapShader;
 
 	//soulspear data
 	aie::OBJMesh m_spearMesh;
 	glm::mat4 m_spearTransform;
+
+	//gun data
+	aie::OBJMesh m_gunMesh;
+	glm::mat4 m_gunTransform;
 
 	//generic quad data
 	Mesh m_quadMesh;
