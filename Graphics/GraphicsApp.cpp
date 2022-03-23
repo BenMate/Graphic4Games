@@ -121,9 +121,18 @@ void GraphicsApp::update(float deltaTime)
 	ImGui::End();
 
 	//Camera Control gui
+	FlyCamera* m_flyCam = dynamic_cast<FlyCamera*>(m_camera[m_cameraIndex]);
 	ImGui::Begin("Camera Settings");
 	ImGui::DragInt("Camera", &m_cameraIndex, 1, 0, m_camera.size() - 1);
-	ImGui::Checkbox("cam Debug Mode", &m_camera[m_cameraIndex]->m_debugMode);
+	ImGui::Checkbox("Cam Debug Mode", &m_camera[m_cameraIndex]->m_debugMode);
+	//get and set the new speed
+	if (m_flyCam != nullptr)
+	{
+	
+		float speed = m_flyCam->GetSpeed();
+		ImGui::DragFloat("Fly Cam Speed", &speed, 0.1f, 1, 5);
+		m_flyCam->SetSpeed(speed);
+	}
 	ImGui::End();
 
 	m_scene->SetCamera(m_camera[m_cameraIndex]);
@@ -140,9 +149,14 @@ void GraphicsApp::draw()
 {
 	//bind our render target
 	m_rendarTarget.bind();
+
 	// wipe the screen to the background colour
 	clearScreen();
+
+	//draw items in scene
 	m_scene->Draw();
+
+	//bind the map shader
 	m_normalMapShader.bind();
 
 	//draw the solar system
@@ -230,9 +244,15 @@ m_gridTexture.bind(0);
 //draw quad
 
 #pragma endregion
-	//=========
-
+	
+	
 	m_rendarTarget.unbind();
+
+	//clear the back buffer
+	clearScreen();
+
+	//draw scene
+	m_scene->Draw();
 
 	//unbind target to return to back buffer
 	m_texturedShader.bind();
@@ -240,8 +260,6 @@ m_gridTexture.bind(0);
 	//bind texturing shader
 	m_rendarTarget.getTarget(0).bind(0);
 
-	//clear the back buffer
-	clearScreen();
 
 	//draw quad
 	m_quadMesh.Draw();
@@ -350,6 +368,7 @@ bool GraphicsApp::LaunchShaders()
 					   0, 0, 0.3, 0,
 					   0, 0, 0, 1 };
 
+	//for x amount, add instances.
 	for (int i = 0; i < 10; i++)
 	{
 		m_scene->AddInstance(new Instance(glm::vec3(i * 2, 0, 0),glm::vec3(0, 0, 0),
@@ -358,8 +377,6 @@ bool GraphicsApp::LaunchShaders()
 			glm::vec3(1, 1, 1), &m_gunMesh, &m_normalMapShader));
 	}
 	
-
-
 	return true;
 }
 
