@@ -47,6 +47,8 @@ public:
 	void AddPointLight(glm::vec3 a_direction, glm::vec3 a_colour, float a_intencity)
 	{ m_pointLights.push_back(Light(a_direction, a_colour, a_intencity)); }
 
+	void SetCamera(Camera* a_camera) { m_camera = a_camera; }
+
 protected:
 
 	//camera

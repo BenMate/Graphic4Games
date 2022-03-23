@@ -38,4 +38,6 @@ void Scene::Draw()
 		Instance* instance = *it;
 		instance->Draw(this);
 	}
+
+	
 }

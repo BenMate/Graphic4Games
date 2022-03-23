@@ -15,11 +15,11 @@ void FlyCamera::Update(float deltaTime)
     glm::vec3 up(0, 1, 0);
 
     //use wasd, zx keys to move camera around
-    if (input->isKeyDown(aie::INPUT_KEY_Z))
-        m_position += up * deltaTime * m_speed;
-
-    if (input->isKeyDown(aie::INPUT_KEY_X))
+    if (input->isKeyDown(aie::INPUT_KEY_LEFT_SHIFT))
         m_position -= up * deltaTime * m_speed;
+
+    if (input->isKeyDown(aie::INPUT_KEY_SPACE))
+        m_position += up * deltaTime * m_speed;
 
     if (input->isKeyDown(aie::INPUT_KEY_D))
         m_position += right * deltaTime * m_speed;

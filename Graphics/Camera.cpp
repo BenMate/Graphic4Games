@@ -1,5 +1,6 @@
 #include "Camera.h"
 #include "Input.h"
+#include "Gizmos.h"
 
 
 glm::mat4 Camera::GetViewMatrix()
@@ -25,6 +26,14 @@ glm::mat4 Camera::GetProjectionMatrix(float w, float h)
 void Camera::Update(float deltaTime)
 {
     
+}
+
+void Camera::Draw()
+{
+    if (m_debugMode)
+    {
+        aie::Gizmos::addSphere(GetPosition(), 0.1f, 10, 10, glm::vec4(1,1,0,1));
+    }
 }
 
 void Camera::SetPerspective(float fov, float aspectRatio, float near, float far)

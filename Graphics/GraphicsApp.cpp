@@ -27,25 +27,22 @@ GraphicsApp::~GraphicsApp()
 
 bool GraphicsApp::startup()
 {
-
-	havePlanets = false;
-
 	setBackgroundColour(0.25f, 0.25f, 0.25f);
 
 	// initialise gizmo primitive counts
 	Gizmos::create(10000, 10000, 10000, 10000);
+
 	//create a new solarSystem
 	if (havePlanets)
 		m_solarSystem = new SolarSystem();
 
 	//create camaera
-	m_camera = new FlyCamera();
+	m_camera.push_back(new Camera()); // stationary camera
+	m_camera.push_back(new FlyCamera()); // player controlled camera
 
 	// create simple camera transforms
 	m_viewMatrix = glm::lookAt(vec3(10), vec3(0), vec3(0, 1, 0));
 	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, 16.0f / 9.0f, 0.1f, 1000.0f);
-
-	
 
 	//start the scene with a default lighting.
 	Light light;
@@ -53,9 +50,7 @@ bool GraphicsApp::startup()
 	light.direction = { 1, -1, 1 };
 	m_ambientLight = { 0.25f, 0.25f, 0.25f };
 
-
-
-	m_scene = new Scene(m_camera, glm::vec2(getWindowWidth(), getWindowHeight()),
+	m_scene = new Scene(m_camera[m_cameraIndex], glm::vec2(getWindowWidth(), getWindowHeight()),
 		light, m_ambientLight);
 
 	//add a point light into the scene
@@ -63,6 +58,12 @@ bool GraphicsApp::startup()
 	m_scene->AddPointLight(glm::vec3(-5, 3, 0), glm::vec3(0, 0, 1), 50);
 
 	m_scene->AddInstance(new Instance(m_spearTransform, &m_spearMesh, &m_normalMapShader));
+
+	if (m_rendarTarget.initialise(1, getWindowWidth(), getWindowHeight()) == false) {
+		printf("Render Target Error!\n");
+		return false;
+	}
+
 
 	return LaunchShaders();
 }
@@ -97,13 +98,6 @@ void GraphicsApp::update(float deltaTime)
 	// add a transform so that we can see the axis
 	Gizmos::addTransform(mat4(1));
 
-	// Grab the time since the application started
-	//float time = getTime();
-
-	// Rotate the light
-	//m_light.direction = glm::normalize(glm::vec3(glm::cos(time * 2), glm::sin(time * 2), 0)); */
-
-
 	// quit if we press escape
 	aie::Input* input = aie::Input::getInstance();
 
@@ -111,42 +105,60 @@ void GraphicsApp::update(float deltaTime)
 		quit();
 
 	//GUI
-
 	//todo: button to change camera + speed.
 	ImGui::Begin("Light Settings");
 	ImGui::DragFloat3("Global Light Direction", &m_scene->GetGlobalLight().direction[0], 0.1f, -1.0f, 1.0f);
 	ImGui::DragFloat3("Global Light colour", &m_scene->GetGlobalLight().colour[0], 0.1, 0.0f, 2.0f);
 	ImGui::End();
 
+	//Point light gui
 	ImGui::Begin("PointLight Settings");
-
 	for (int i = 0; i < m_scene->GetNumLights(); i++)
 	{
 		ImGui::DragFloat3("Point Light Direction", &m_scene->GetPointLight()[i].direction[0], 0.1f, -1.0f, 1.0f);
 		ImGui::DragFloat3("Point Light colour", &m_scene->GetPointLight()[i].colour[0], 0.1, 0.0f, 2.0f);
 	}
-
 	ImGui::End();
+
+	//Camera Control gui
+	ImGui::Begin("Camera Settings");
+	ImGui::DragInt("Camera", &m_cameraIndex, 1, 0, m_camera.size() - 1);
+	ImGui::Checkbox("cam Debug Mode", &m_camera[m_cameraIndex]->m_debugMode);
+	ImGui::End();
+
+	m_scene->SetCamera(m_camera[m_cameraIndex]);
+
 	//update solarSystem
-	if (havePlanets) m_solarSystem->Update(deltaTime);
+	if (havePlanets) 
+		m_solarSystem->Update(deltaTime);
 
 	//update camera
-	m_camera->Update(deltaTime);
+	m_camera[m_cameraIndex]->Update(deltaTime);
 }
 
 void GraphicsApp::draw()
 {
+	//bind our render target
+	m_rendarTarget.bind();
 	// wipe the screen to the background colour
 	clearScreen();
+	m_scene->Draw();
+	m_normalMapShader.bind();
 
 	//draw the solar system
 	if (havePlanets)
 		m_solarSystem->Draw();
 
-	//m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, getWindowWidth() / (float)getWindowHeight(), 0.1f, 1000.0f);
-	glm::mat4 projectionMatrix = m_camera->GetProjectionMatrix(getWindowWidth(),
+	//camera's Draw
+	for (int i = 0; i < m_camera.size(); i++)
+	{
+		m_camera[i]->Draw();
+	}
+
+	glm::mat4 projectionMatrix = m_camera[m_cameraIndex]->GetProjectionMatrix(getWindowWidth(),
 		(float)getWindowHeight());
-	glm::mat4 viewMatrix = m_camera->GetViewMatrix();
+	glm::mat4 viewMatrix = m_camera[m_cameraIndex]->GetViewMatrix();
+
 
 	//old ways
 #pragma region Bunny Draw
@@ -186,22 +198,6 @@ void GraphicsApp::draw()
 
 #pragma endregion
 
-#pragma region Quad Draw
-	//bind the phong shader
-	//m_texturedShader.bind();
-	//m_modelTransform = m_quadTransform;
-	//pvm = projectionMatrix * viewMatrix * m_modelTransform;
-	////simple binding for lighting data based on model used
-	//m_texturedShader.bindUniform("ProjectionViewModel", pvm);
-
-	////bind the texture at the location
-	//m_texturedShader.bindUniform("diffuseTexture", 0);
-	////bind the texture to the specific location
-	//m_gridTexture.bind(0);
-	////draw quad
-	//m_quadMesh.Draw();
-#pragma endregion
-
 #pragma region Soul Spear Draw
 	//m_normalMapShader.bind();
 	//m_modelTransform = m_spearTransform;
@@ -217,10 +213,38 @@ void GraphicsApp::draw()
 	//m_normalMapShader.bindUniform("ModelMatrix", m_modelTransform);
 	//m_spearMesh.draw();
 #pragma endregion
+
+#pragma region Quad Draw
+//bind the phong shader
+
+m_texturedShader.bind();
+m_modelTransform = m_quadTransform;
+auto pvm = projectionMatrix * viewMatrix * m_modelTransform;
+//simple binding for lighting data based on model used
+m_texturedShader.bindUniform("ProjectionViewModel", pvm);
+
+//bind the texture at the location
+m_texturedShader.bindUniform("diffuseTexture", 0);
+//bind the texture to the specific location
+m_gridTexture.bind(0);
+//draw quad
+
+#pragma endregion
 	//=========
 
-	m_scene->Draw();
+	m_rendarTarget.unbind();
 
+	//unbind target to return to back buffer
+	m_texturedShader.bind();
+
+	//bind texturing shader
+	m_rendarTarget.getTarget(0).bind(0);
+
+	//clear the back buffer
+	clearScreen();
+
+	//draw quad
+	m_quadMesh.Draw();
 
 	Gizmos::draw(projectionMatrix * viewMatrix);
 }

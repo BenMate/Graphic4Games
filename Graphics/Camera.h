@@ -10,6 +10,7 @@ class Camera
 public:
 	
 	virtual void Update(float deltaTime);
+	virtual void Draw();
 
 	//getters
 	glm::mat4 GetWorldTransform() const { return m_worldTransform; }
@@ -25,6 +26,8 @@ public:
 	void SetPerspective(float fov, float aspectRatio, float near, float far);
 	void SetLookAt(glm::vec3 from, glm::vec3 to, glm::vec3 up);
 	
+	bool m_debugMode = true;
+
 protected:
 
 	glm::vec3 m_position = glm::vec3(-20.0f, 2.0f, 0.0f);

@@ -2,11 +2,13 @@
 
 #include "Application.h"
 #include <glm/mat4x4.hpp>
+#include <vector>
 
 #include "Texture.h"
 #include "Shader.h"
 #include "Mesh.h"
 #include "OBJMesh.h"
+#include "RenderTarget.h"
 
 #include "SolarSystem.h"
 #include "Camera.h"
@@ -49,7 +51,8 @@ protected:
 	//todo: make vectors of m_camera
 	//pushback new flyCamera etc.... make an index value 
 	//look in imgui for each camera etc...
-	Camera* m_camera;
+	std::vector <Camera*> m_camera;
+	int m_cameraIndex = 0;
 
 	SolarSystem* m_solarSystem;
 
@@ -93,4 +96,7 @@ protected:
 
 	//scene data
 	Scene* m_scene;
+
+	//render data
+	aie::RenderTarget m_rendarTarget;
 };
