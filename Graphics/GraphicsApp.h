@@ -1,18 +1,19 @@
 #pragma once
 
 #include "Application.h"
-#include <glm/mat4x4.hpp>
-#include <vector>
-
-#include "Texture.h"
 #include "Shader.h"
 #include "Mesh.h"
 #include "OBJMesh.h"
-#include "RenderTarget.h"
 
-#include "SolarSystem.h"
 #include "Camera.h"
 #include "FlyCamera.h"
+#include "RenderTarget.h"
+#include "SolarSystem.h"
+
+#include <glm/mat4x4.hpp>
+
+#include <vector>
+
 
 class Scene;
 class SolarSystem;
@@ -32,7 +33,6 @@ public:
 protected:
 
 	bool LaunchShaders();
-	void CamControls(float deltaTime);
 
 	bool havePlanets = false;
 	
@@ -66,6 +66,15 @@ protected:
 	aie::ShaderProgram m_phongShader;
 	aie::ShaderProgram m_texturedShader;
 	aie::ShaderProgram m_normalMapShader;
+	aie::ShaderProgram m_postShader;
+
+	//render data
+	aie::RenderTarget m_rendarTarget;
+
+	int m_postProcessEffect = 2;
+
+	//for post processing
+	Mesh m_screenQuad;
 
 	//soulspear data
 	aie::OBJMesh m_spearMesh;
@@ -97,6 +106,6 @@ protected:
 	//scene data
 	Scene* m_scene;
 
-	//render data
-	aie::RenderTarget m_rendarTarget;
+	
+	
 };

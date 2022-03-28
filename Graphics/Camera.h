@@ -9,6 +9,9 @@ class Camera
 
 public:
 	
+	Camera();
+	~Camera();
+
 	virtual void Update(float deltaTime);
 	virtual void Draw();
 

@@ -2,6 +2,18 @@
 #include "Input.h"
 #include "Gizmos.h"
 
+Camera::Camera()
+{
+    m_theta = 0;
+    m_phi = 0;
+    m_position = glm::vec3(-11, 5, 0);
+    m_debugMode = true;
+}
+
+Camera::~Camera()
+{
+
+}
 
 glm::mat4 Camera::GetViewMatrix()
 {
@@ -22,6 +34,8 @@ glm::mat4 Camera::GetProjectionMatrix(float w, float h)
         w / h,
         0.1f, 1000.0f);
 }
+
+
 
 void Camera::Update(float deltaTime)
 {
