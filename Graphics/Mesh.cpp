@@ -89,7 +89,7 @@ void Mesh::InitialiseFullScreenQuad()
 		vertices, GL_STATIC_DRAW);
 
 	//now we enable the first elementas the position
-	glDisableVertexAttribArray(0);
+	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 8, 0);
 
 	// then unbind our buffers

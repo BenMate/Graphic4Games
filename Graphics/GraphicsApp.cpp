@@ -176,7 +176,7 @@ void GraphicsApp::draw()
 	// Bind the post processing shader and texture
 	m_postShader.bind();
 	m_postShader.bindUniform("colourTarget", 0);
-	m_postShader.bindUniform("postProcessTarget", m_postProcessEffect);
+	m_postShader.bindUniform("postProcessTarget", 2);
 	m_rendarTarget.getTarget(0).bind(0);
 	m_screenQuad.Draw();
 	
@@ -184,129 +184,6 @@ void GraphicsApp::draw()
 
 bool GraphicsApp::LaunchShaders()
 {
-#pragma region Test
-//	if (!m_rendarTarget.initialise(1, getWindowWidth(), getWindowHeight()))
-//	{
-//		printf("[Render Target] Error!\n");
-//		return false;
-//	}
-//#pragma region Shaders
-//	m_shader.loadShader(aie::eShaderStage::VERTEX, "./shaders/simple.vert");
-//	m_shader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/simple.frag");
-//	m_phongShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/phong.vert");
-//	m_phongShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/phong.frag");
-//	m_texturedShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/textured.vert");
-//	m_texturedShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/textured.frag");
-//	m_normalMapShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/normalMap.vert");
-//	m_normalMapShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/normalMap.frag");
-//	m_postShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/post.vert");
-//	m_postShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/post.frag");
-//	if (!m_shader.link())
-//	{
-//		printf("[Simple] Shader Error: %s\n", m_shader.getLastError());
-//		return false;
-//	}
-//	if (!m_phongShader.link())
-//	{
-//		printf("[Phong] Shader Error: %s\n", m_phongShader.getLastError());
-//		return false;
-//	}
-//	if (!m_texturedShader.link())
-//	{
-//		printf("[Textured] Shader Error: %s\n", m_texturedShader.getLastError());
-//		return false;
-//	}
-//	if (!m_normalMapShader.link())
-//	{
-//		printf("[Normal Map] Shader Error: %s\n", m_normalMapShader.getLastError());
-//		return false;
-//	}
-//	if (!m_postShader.link())
-//	{
-//		printf("[Post Processing] Shader Error: %s\n", m_postShader.getLastError());
-//		return false;
-//	}
-//#pragma endregion
-//#pragma region Mesh
-//	m_screenQuad.InitialiseFullScreenQuad();
-//	if (!m_bunnyMesh.load("./stanford/bunny.obj"))
-//	{
-//		printf("Bunny Mesh Error!\n");
-//		return false;
-//	}
-//	if (!m_spearMesh.load("./soulspear/soulspear.obj", true, true))
-//	{
-//		printf("Spear Mesh Error!\n");
-//		return false;
-//	}
-//	if (!m_gunMesh.load("./Gun/P88.obj", true, true))
-//	{
-//		printf("Other Mesh Error!\n");
-//		return false;
-//	}
-//#pragma endregion
-//#pragma region Texture
-//	if (!m_gridTexture.load("./textures/numbered_grid.tga"))
-//	{
-//		printf("Failed to load the grid texture, please check file path!\n");
-//		return false;
-//	}
-//	//if (!m_spearTexture.load("./soulspear/soulspear_diffuse.tga"))
-//	//{
-//	//  printf("Failed to load the spear texture, please check file path!\n");
-//	//  return false;
-//	//}
-//	//if (!m_ironManTexture.load("./ironguy/M-COC_iOS_HERO_Tony_Stark_Iron_Man_Mark_VII_Body_D.png"))
-//	//{
-//	//  printf("Failed to load the ironman texture, please check file path!\n");
-//	//  return false;
-//	//}
-//#pragma endregion
-//	m_bunnyTransform = {
-//		0.05f,0,0,0,
-//		0,0.05f,0,0,
-//		0,0,0.05f,0,
-//		0,0,0,1
-//	};
-//	m_spearTransform = {
-//		1.0f,0,0,0,
-//		0,1.0f,0,0,
-//		0,0,1.0f,0,
-//		0,0,0,1.0f
-//	};
-//	m_gunTransform = {
-//		0.01f,0,0,0,
-//		0,0.01f,0,0,
-//		0,0,0.01f,0,
-//		0,0,0,0.01f
-//	};
-//	// Define 6 vertices for our two triangles
-//	Mesh::Vertex vertices[4];
-//	vertices[0].position = { -0.5f, 0 ,0.5f, 1.0f };
-//	vertices[1].position = { 0.5f, 0 ,0.5f, 1.0f };
-//	vertices[2].position = { -0.5f, 0 ,-0.5f, 1.0f };
-//	vertices[3].position = { 0.5f, 0 ,-0.5f, 1.0f };
-//	unsigned int indices[6] = {
-//		0,1,2,2,1,3
-//	};
-//	//m_quadMesh.Initialise(4, vertices, 6, indices);
-//	//m_quadMesh.CreateGrid(2,2);
-//	m_quadMesh.InitialiseQuad();
-//	m_quadTransform = {
-//		10,  0,  0,  0,
-//		 0, 10,  0,  0,
-//		 0,  0, 10,  0,
-//		 0,  0,  0,  1
-//	}; // This is 10 units large
-//	for (int i = 0; i < 10; i++)
-//		m_scene->AddInstance(new Instance(glm::vec3(i * 2, 0, 0), glm::vec3(0, i * 30, i * 30),
-//			glm::vec3(1, 1, 1), &m_spearMesh, &m_normalMapShader));
-//	for (int i = 0; i < 10; i++)
-//		m_scene->AddInstance(new Instance(glm::vec3(i * 2, 0, 0), glm::vec3(0, 0, 0),
-//			glm::vec3(0.1f * i, 0.1f * i, 0.1f * i), &m_gunMesh, &m_normalMapShader));
-//	return true;
-#pragma endregion
-
 	if (m_rendarTarget.initialise(1, getWindowWidth(), getWindowHeight()) == false)
 	{
 				printf("Render Target: error \n");
