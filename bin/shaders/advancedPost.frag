@@ -6,6 +6,7 @@ in vec2 vTexCoord;
 
 uniform sampler2D colourTarget;
 uniform int postProcessTarget;
+uniform int pixelAmount;
 
 out vec4 FragColour;
 
@@ -56,6 +57,13 @@ vec4 Sepia(vec2 texCoord)
         1.0f
     );
     return sepia;
+}
+
+vec4 Pixel(vec2 texCoord)
+{
+    vec2 grid = round(texCoord * float(pixelAmount)) / float(pixelAmount);
+    vec4 colour = texture(colourTarget, grid);
+    return colour;
 }
 
 void main()
@@ -117,7 +125,7 @@ void main()
         }
         case 8: // pixelLizer
         {
-            FragColour = Default(texCoord);
+            FragColour = Pixel(texCoord);
             break;
         }
         case 9: // Posterization

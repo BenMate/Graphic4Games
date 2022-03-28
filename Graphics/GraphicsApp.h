@@ -34,9 +34,6 @@ protected:
 
 	bool LaunchShaders();
 
-	void SetProcessEffect(int index) { m_postProcessEffect = index; }
-	int GetProccessEffectsIndex() { return m_postProcessEffect; }
-
 	bool havePlanets = false;
 	
 	float m_zoom = 10.0f;
@@ -55,7 +52,7 @@ protected:
 	//pushback new flyCamera etc.... make an index value 
 	//look in imgui for each camera etc...
 	std::vector <Camera*> m_camera;
-	int m_cameraIndex = 0;
+	int m_cameraIndex = 1;
 
 	SolarSystem* m_solarSystem;
 
@@ -74,7 +71,9 @@ protected:
 	//render data
 	aie::RenderTarget m_rendarTarget;
 
-	int m_postProcessEffect = 0;
+	int m_postProcessEffect = 8;
+
+	int m_pixelAmount = 100;
 
 	//for post processing
 	Mesh m_screenQuad;
