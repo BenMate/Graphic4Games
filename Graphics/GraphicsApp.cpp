@@ -120,12 +120,22 @@ void GraphicsApp::update(float deltaTime)
 	//get and set the new speed
 	if (m_flyCam != nullptr)
 	{
-
 		float speed = m_flyCam->GetSpeed();
 		ImGui::DragFloat("Fly Cam Speed", &speed, 0.1f, 1, 5);
 		m_flyCam->SetSpeed(speed);
 	}
 	ImGui::End();
+
+	//shader effects editor
+	//GraphicsApp* shaderEffect = dynamic_cast<GraphicsApp*>();
+	//int shaderIndex = shaderEffect->GetProccessEffectsIndex();
+
+	//ImGui::Begin("Shader Index");
+	//ImGui::DragInt("postProcessEffect", &shaderEffect, 0.1f, 1, 5);
+	//
+	//shaderEffect->SetProcessEffect(shaderIndex);
+	//ImGui::End();
+	
 #pragma endregion
 
 	m_scene->SetCamera(m_camera[m_cameraIndex]);
@@ -176,7 +186,7 @@ void GraphicsApp::draw()
 	// Bind the post processing shader and texture
 	m_postShader.bind();
 	m_postShader.bindUniform("colourTarget", 0);
-	m_postShader.bindUniform("postProcessTarget", 2);
+	m_postShader.bindUniform("postProcessTarget", m_postProcessEffect);
 	m_rendarTarget.getTarget(0).bind(0);
 	m_screenQuad.Draw();
 	

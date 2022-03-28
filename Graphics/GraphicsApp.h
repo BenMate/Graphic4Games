@@ -34,6 +34,9 @@ protected:
 
 	bool LaunchShaders();
 
+	void SetProcessEffect(int index) { m_postProcessEffect = index; }
+	int GetProccessEffectsIndex() { return m_postProcessEffect; }
+
 	bool havePlanets = false;
 	
 	float m_zoom = 10.0f;
@@ -71,7 +74,7 @@ protected:
 	//render data
 	aie::RenderTarget m_rendarTarget;
 
-	int m_postProcessEffect = 2;
+	int m_postProcessEffect = 0;
 
 	//for post processing
 	Mesh m_screenQuad;
