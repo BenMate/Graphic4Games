@@ -36,7 +36,7 @@ bool GraphicsApp::startup()
 
 	m_camera.push_back(new Camera()); // stationary camera
 	m_camera.push_back(new FlyCamera()); // player controlled camera
-	//m_camera.push_back(new OrbitalCamera(0.0f, 10.0f, RotationalDirection::CW));
+	m_camera.push_back(new OrbitalCamera(1.0f, 1, 10.0f, RotationalDirection::CW));
 
 	m_camera[1]->SetPosition({ -10, 5, 0 });
 
@@ -115,7 +115,7 @@ void GraphicsApp::update(float deltaTime)
 	//Camera Control gui
 	FlyCamera* m_flyCam = dynamic_cast<FlyCamera*>(m_camera[m_cameraIndex]);
 	ImGui::Begin("Camera Settings");
-	ImGui::DragInt("Camera", &m_cameraIndex, 1, 0, m_camera.size() - 1);
+	ImGui::DragInt("Camera", &m_cameraIndex, 0.01f, 0, m_camera.size() - 1);
 	ImGui::Checkbox("Cam Debug Mode", &m_camera[m_cameraIndex]->m_debugMode);
 
 	//get and set the new speed

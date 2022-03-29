@@ -130,7 +130,6 @@ void ParticleEmitter::Update(float a_deltaTime, const glm::mat4& a_cameraTransfo
 {
 	//this will move and update all alive particles, then remove the dying particles
 	//it will then emit the particles based on the emitters provided rate.
-
 	//finally we will update the vertex array and construct the billboarding;
 
 	m_emitTimer += a_deltaTime;
