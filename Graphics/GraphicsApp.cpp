@@ -36,6 +36,8 @@ bool GraphicsApp::startup()
 
 	m_camera.push_back(new Camera()); // stationary camera
 	m_camera.push_back(new FlyCamera()); // player controlled camera
+	//m_camera.push_back(new OrbitalCamera(0.0f, 10.0f, RotationalDirection::CW));
+
 	m_camera[1]->SetPosition({ -10, 5, 0 });
 
 	// create simple camera transforms
@@ -54,6 +56,8 @@ bool GraphicsApp::startup()
 	//add a point light into the scene
 	m_scene->AddPointLight(glm::vec3(5, 3, 0), glm::vec3(1, 0, 0), 50);
 	m_scene->AddPointLight(glm::vec3(-5, 3, 0), glm::vec3(0, 0, 1), 50);
+
+	InitialiseOurParticles();
 
 	return LaunchShaders();
 }
@@ -118,7 +122,7 @@ void GraphicsApp::update(float deltaTime)
 	if (m_flyCam != nullptr)
 	{
 		float speed = m_flyCam->GetSpeed();
-		ImGui::DragFloat("Fly Cam Speed", &speed, 0.1f, 1, 5);
+		ImGui::DragFloat("Fly Cam Speed", &speed, 0.1f, 1, 30);
 		m_flyCam->SetSpeed(speed);
 	}
 	ImGui::End();
@@ -132,10 +136,12 @@ void GraphicsApp::update(float deltaTime)
 	
 #pragma endregion
 
+	//set and update current camera
 	m_scene->SetCamera(m_camera[m_cameraIndex]);
-
-	//update camera
 	m_camera[m_cameraIndex]->Update(deltaTime);
+
+	m_emitter->Update(deltaTime, m_camera[m_cameraIndex]->GetTransform(m_camera[m_cameraIndex]->GetPosition(),
+		glm::vec3(0), glm::vec3(1)));
 }
 
 void GraphicsApp::draw()
@@ -156,6 +162,10 @@ void GraphicsApp::draw()
 	auto pvm = projectionMatrix * viewMatrix * mat4(1);
 
 	m_scene->Draw();
+
+	pvm = projectionMatrix * viewMatrix * m_particleTransform;
+	DrawOurParticles(pvm);
+
 	m_rendarTarget.unbind();
 	clearScreen();
 
@@ -199,6 +209,7 @@ bool GraphicsApp::LaunchShaders()
 	m_texturedShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/textured.vert");
 	m_normalMapShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/normalMap.vert");
 	m_postShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/advancedPost.vert");
+	m_particleShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/particle.vert");
 
 	//load fragment
 	m_shader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/simple.frag");
@@ -206,8 +217,9 @@ bool GraphicsApp::LaunchShaders()
 	m_texturedShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/textured.frag");
 	m_normalMapShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/normalMap.frag");
 	m_postShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/advancedPost.frag");
+	m_particleShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/particle.frag");
 
-	//link
+	//link shaders
 	if (m_shader.link() == false) printf("simple Shader Error: %s\n", m_shader.getLastError());
 	if (m_phongShader.link() == false) printf("phong shader Error: %s\n", m_phongShader.getLastError());
 	if (m_texturedShader.link() == false)
@@ -225,8 +237,13 @@ bool GraphicsApp::LaunchShaders()
 		printf("Post prossesing shader has had an error: %s\n", m_postShader.getLastError());
 		return false;
 	}
+	if (m_particleShader.link() == false)
+	{
+		printf("Particle shader has an error: %s \n", m_particleShader.getLastError());
+		return false;
+	}
 
-	//load
+	//load textures
 	if (m_gridTexture.load("./textures/numbered_grid.tga") == false)
 	{
 		printf("failed to load the texture, please check file path\n");
@@ -274,6 +291,10 @@ bool GraphicsApp::LaunchShaders()
 					   0, 0.3, 0, 0,
 					   0, 0, 0.3, 0,
 					   0, 0, 0, 1 };
+	m_particleTransform = { 1, 0, 0, 0,
+						 0, 1, 0, 0,
+						 0, 0, 1, 0,
+						 0, 0, 0, 1 };
 
 	//create the fullscreen quad for post precessing effects
 	m_screenQuad.InitialiseFullScreenQuad();
@@ -288,4 +309,18 @@ bool GraphicsApp::LaunchShaders()
 	}
 	//=================================================================================
 	return true;
+}
+
+void GraphicsApp::InitialiseOurParticles()
+{
+	m_emitter = new ParticleEmitter();
+	m_emitter->Initialise(1000, 500, 0.1, 1.0f, 1.0f, 10.0f, 2.0f, 0.1f, glm::vec4(0, 1, 1, 1), glm::vec4(1, 1, 0, 1));
+
+}
+
+void GraphicsApp::DrawOurParticles(glm::mat4 a_pvm)
+{
+	m_particleShader.bind();
+	m_particleShader.bindUniform("ProjectionViewModel", a_pvm);
+	m_emitter->Draw();
 }

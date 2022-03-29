@@ -66,6 +66,12 @@
     <ClCompile Include="RenderTarget.cpp">
       <Filter>Source Files\Provided</Filter>
     </ClCompile>
+    <ClCompile Include="ParticleEmitter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OrbitalCamera.cpp">
+      <Filter>Source Files\Extentions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GraphicsApp.h">
@@ -103,6 +109,12 @@
     </ClInclude>
     <ClInclude Include="RenderTarget.h">
       <Filter>Header Files\Provided</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleEmitter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OrbitalCamera.h">
+      <Filter>Header Files\Extension</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

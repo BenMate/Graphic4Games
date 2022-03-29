@@ -24,6 +24,8 @@ public:
 	glm::mat4 GetViewMatrix();
 	glm::mat4 GetProjectionMatrix(float w, float h);
 
+	glm::mat4 GetTransform(glm::vec3 a_position, glm::vec3 a_eulerAngles, glm::vec3 a_scale);
+
 	//setters
 	void SetPosition(glm::vec3 newPos) { m_position = newPos; }
 	void SetPerspective(float fov, float aspectRatio, float near, float far);

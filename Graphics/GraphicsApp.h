@@ -7,7 +7,11 @@
 
 #include "Camera.h"
 #include "FlyCamera.h"
+#include "OrbitalCamera.h"
+
 #include "RenderTarget.h"
+#include "ParticleEmitter.h"
+
 #include "SolarSystem.h"
 
 #include <glm/mat4x4.hpp>
@@ -67,6 +71,7 @@ protected:
 	aie::ShaderProgram m_texturedShader;
 	aie::ShaderProgram m_normalMapShader;
 	aie::ShaderProgram m_postShader;
+	aie::ShaderProgram m_particleShader;
 
 	//render data
 	aie::RenderTarget m_rendarTarget;
@@ -79,35 +84,40 @@ protected:
 	Mesh m_screenQuad;
 
 	//soulspear data
-	aie::OBJMesh m_spearMesh;
-	glm::mat4 m_spearTransform;
+	aie::OBJMesh	m_spearMesh;
+	glm::mat4		m_spearTransform;
 
 	//gun data
-	aie::OBJMesh m_gunMesh;
-	glm::mat4 m_gunTransform;
+	aie::OBJMesh	m_gunMesh;
+	glm::mat4		m_gunTransform;
 
 	//generic quad data
-	Mesh m_quadMesh;
-	glm::mat4 m_quadTransform;
+	Mesh			m_quadMesh;
+	glm::mat4		m_quadTransform;
 
 	//standford bunny data
-	aie::OBJMesh m_bunnyMesh;
-	glm::mat4 m_bunnyTransform;
+	aie::OBJMesh	m_bunnyMesh;
+	glm::mat4		m_bunnyTransform;
 
 	//box data
 	Mesh m_boxMesh;
-	glm::mat4 m_boxTransform;
+	glm::mat4		m_boxTransform;
 
 	//pyromid data
-	Mesh m_pyromidMesh;
-	glm::mat4 m_pyromidTransform;
+	Mesh			m_pyromidMesh;
+	glm::mat4		m_pyromidTransform;
 
 	//light data
-	glm::vec3 m_ambientLight;
+	glm::vec3		m_ambientLight;
 
 	//scene data
-	Scene* m_scene;
+	Scene*			m_scene;
 
-	
+	//particle data
+	ParticleEmitter* m_emitter;
+	glm::mat4		 m_particleTransform;
+
+	void InitialiseOurParticles();
+	void DrawOurParticles(glm::mat4 a_pvm);
 	
 };
