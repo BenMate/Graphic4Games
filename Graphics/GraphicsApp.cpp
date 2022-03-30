@@ -48,7 +48,7 @@ bool GraphicsApp::startup()
 	Light light;
 	light.colour = { 1, 1, 1 };
 	light.direction = { 1, -1, 1 };
-	m_ambientLight = { 0.25f, 0.25f, 0.25f };
+	m_ambientLight = { 0.5f, 0.5f, 0.5f };
 
 	m_scene = new Scene(m_camera[m_cameraIndex], glm::vec2(getWindowWidth(), getWindowHeight()),
 		light, m_ambientLight);
@@ -96,7 +96,7 @@ void GraphicsApp::update(float deltaTime)
 	if (input->isKeyDown(aie::INPUT_KEY_ESCAPE))
 		quit();
 
-	#pragma region IMGUI
+#pragma region IMGUI
 	//GUI
 	ImGui::Begin("Light Settings");
 	ImGui::DragFloat3("Global Light Direction", &m_scene->GetGlobalLight().direction[0], 0.1f, -1.0f, 1.0f);
@@ -161,15 +161,39 @@ void GraphicsApp::draw()
 	glm::mat4 viewMatrix = m_camera[m_cameraIndex]->GetViewMatrix();
 	auto pvm = projectionMatrix * viewMatrix * mat4(1);
 
+#pragma region BunnyTests
+	m_phongShader.bind();
+	m_phongShader.bindUniform("LightDirection", m_scene->GetGlobalLight().direction);
+	m_phongShader.bindUniform("AmbientColour", m_scene->GetAmbientLight());
+	m_phongShader.bindUniform("LightColour", m_scene->GetGlobalLight().colour);
+	m_phongShader.bindUniform("CameraPosition", m_camera[m_cameraIndex]->GetPosition());
+
+	pvm = projectionMatrix * viewMatrix * m_bunnyTransform;
+	m_phongShader.bindUniform("ProjectionViewModel", pvm);
+	m_phongShader.bindUniform("ModelMatrix", m_bunnyTransform);
+
+	m_marbleTexture.bind(0);
+	m_phongShader.bindUniform("seamlessTexture", 0);
+
+	m_hatchingTexture.bind(1);
+	m_phongShader.bindUniform("hatchingTexture", 1);
+
+	m_rampTexture.bind(2);
+	m_phongShader.bindUniform("rampTexture", 2);
+
+	m_bunnyMesh.draw();
+#pragma endregion
+
 	m_scene->Draw();
 
+	//particles
 	pvm = projectionMatrix * viewMatrix * m_particleTransform;
 	DrawOurParticles(pvm);
 
 	m_rendarTarget.unbind();
 	clearScreen();
 
-	#pragma region Quad
+#pragma region Quad
 	// Texture Quad
 	m_texturedShader.bind();
 	m_modelTransform = m_quadTransform;
@@ -178,6 +202,7 @@ void GraphicsApp::draw()
 	m_texturedShader.bindUniform("diffuseTexture", 0);
 	// Draw the quad
 	m_gridTexture.bind(0);
+
 	//m_rendarTarget.getTarget(0).bind(0);
 	m_quadMesh.Draw();
 #pragma endregion
@@ -205,7 +230,7 @@ bool GraphicsApp::LaunchShaders()
 
 	//load vertex
 	m_shader.loadShader(aie::eShaderStage::VERTEX, "./shaders/simple.vert");
-	m_phongShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/phong.vert");
+	m_phongShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/phongExt.vert");
 	m_texturedShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/textured.vert");
 	m_normalMapShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/normalMap.vert");
 	m_postShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/advancedPost.vert");
@@ -213,7 +238,7 @@ bool GraphicsApp::LaunchShaders()
 
 	//load fragment
 	m_shader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/simple.frag");
-	m_phongShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/phong.frag");
+	m_phongShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/phongExt.frag");
 	m_texturedShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/textured.frag");
 	m_normalMapShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/normalMap.frag");
 	m_postShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/advancedPost.frag");
@@ -249,6 +274,11 @@ bool GraphicsApp::LaunchShaders()
 		printf("failed to load the texture, please check file path\n");
 		return false;
 	}
+	m_marbleTexture.load("./textures/marble2.jpg");
+	m_hatchingTexture.load("./textures/Ramp02.png");
+	m_rampTexture.load("./textures/ramps.png", true);
+
+	//load mesh
 	if (m_bunnyMesh.load("./stanford/bunny.obj") == false)
 	{
 		printf("Bunny mesh Error!\n");
@@ -278,11 +308,12 @@ bool GraphicsApp::LaunchShaders()
 	m_quadTransform = { 10, 0, 0, 0,
 						0, 10, 0, 0,
 						0, 0, 10, 0,
-						0, 0, 0, 1 }; //this is 10 units large
-	m_bunnyTransform = { 0.1, 0, 0, 0,
-						 0, 0.1, 0, 0,
-						 0, 0, 0.1, 0,
-						 0, 0, 0, 1 };
+						0, 0, 0, 1 }; 
+	//this is 10 units large
+	m_bunnyTransform = { 2, 0, 0, 0,
+						 0, 2, 0, 0,
+						 0, 0, 2, 0,
+						 0, 0, 0, 2 };
 	m_spearTransform = { 1, 0, 0, 0,
 						 0, 1, 0, 0,
 					     0, 0, 1, 0,
@@ -300,14 +331,17 @@ bool GraphicsApp::LaunchShaders()
 	m_screenQuad.InitialiseFullScreenQuad();
 
 	//add instances  ==================================================================
-	for (int i = 0; i < 10; i++)
+	//for (int i = 0; i < 10; i++)
 	{
-		m_scene->AddInstance(new Instance(glm::vec3(i * 2, 0, 0),glm::vec3(0, 0, 0),
-			glm::vec3(1, 1, 1), &m_spearMesh, &m_normalMapShader));
-		m_scene->AddInstance(new Instance(glm::vec3(i * 4, 0, i * 5), glm::vec3(i * 20, 0, 0),
-			glm::vec3(1, 1, 1), &m_gunMesh, &m_normalMapShader));
+	///	m_scene->AddInstance(new Instance(glm::vec3(i * 2, 0, 0),glm::vec3(0, 0, 0),
+	//		glm::vec3(1, 1, 1), &m_spearMesh, &m_normalMapShader));
+		//m_scene->AddInstance(new Instance(glm::vec3(i * 4, 0, i * 5), glm::vec3(i * 20, 0, 0),
+	//		glm::vec3(1, 1, 1), &m_gunMesh, &m_normalMapShader));
 	}
 	//=================================================================================
+
+	
+
 	return true;
 }
 

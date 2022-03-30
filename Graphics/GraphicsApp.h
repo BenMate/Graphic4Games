@@ -64,6 +64,9 @@ protected:
 	aie::Texture m_gridTexture;
 	aie::Texture m_spearTexture;
 	aie::Texture m_gunTexture;
+	aie::Texture m_marbleTexture;
+	aie::Texture m_hatchingTexture;
+	aie::Texture m_rampTexture;
 
 	//shader data
 	aie::ShaderProgram m_shader;
@@ -76,7 +79,7 @@ protected:
 	//render data
 	aie::RenderTarget m_rendarTarget;
 
-	int m_postProcessEffect = 8;
+	int m_postProcessEffect = 1;
 
 	int m_pixelAmount = 100;
 
