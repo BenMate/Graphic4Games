@@ -48,13 +48,11 @@ protected:
 
 	glm::mat4 m_modelTransform;
 
-	// camera transforms
+	//camera transforms
 	glm::mat4 m_viewMatrix;
 	glm::mat4 m_projectionMatrix;
 
-	//todo: make vectors of m_camera
-	//pushback new flyCamera etc.... make an index value 
-	//look in imgui for each camera etc...
+	//camera data
 	std::vector <Camera*> m_camera;
 	int m_cameraIndex = 1;
 
@@ -82,6 +80,7 @@ protected:
 	int m_postProcessEffect = 1;
 
 	int m_pixelAmount = 100;
+	float m_blurStrength = 1.0f;
 
 	//for post processing
 	Mesh m_screenQuad;
@@ -89,6 +88,8 @@ protected:
 	//soulspear data
 	aie::OBJMesh	m_spearMesh;
 	glm::mat4		m_spearTransform;
+	//test pos
+	glm::vec3       m_spearPosition;
 
 	//gun data
 	aie::OBJMesh	m_gunMesh;

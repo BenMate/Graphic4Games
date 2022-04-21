@@ -7,6 +7,7 @@ in vec2 vTexCoord;
 uniform sampler2D colourTarget;
 uniform int postProcessTarget;
 uniform int pixelAmount;
+uniform float blurStrength = 1.0f;
 
 out vec4 FragColour;
 
@@ -17,7 +18,7 @@ vec4 Default(vec2 texCoord)
 
 vec4 BoxBlur(vec2 texCoord)
 {
-    vec2 texel = 1.0f / textureSize(colourTarget, 0);
+    vec2 texel = blurStrength / textureSize(colourTarget, 0);
     vec4 colour = texture(colourTarget, texCoord);
 
     colour += texture(colourTarget, texCoord + texel * vec2 (-1 ,  1));
@@ -66,6 +67,11 @@ vec4 Pixel(vec2 texCoord)
     return colour;
 }
 
+vec4 Invert(vec2 texCoord)
+{  
+    return texture(colourTarget, 1-texCoord);
+}
+
 void main()
 {
     // First calculate the texels size
@@ -76,7 +82,6 @@ void main()
     // Adjust the scale and coordinates
 
     vec2 scale = (texSize - texelSize) / texSize;
-
     vec2 texCoord = vTexCoord / scale + texelSize * 0.5f;
 
     // This will output, the desired post processing effect
@@ -120,7 +125,7 @@ void main()
         }
         case 7: // Invert
         {
-            FragColour = Default(texCoord);
+            FragColour = Invert(texCoord);
             break;
         }
         case 8: // pixelLizer

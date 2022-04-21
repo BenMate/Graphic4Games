@@ -45,8 +45,6 @@ glm::mat4 Camera::GetTransform(glm::vec3 a_position, glm::vec3 a_eulerAngles, gl
 }
 
 
-
-
 void Camera::Update(float deltaTime)
 {
     

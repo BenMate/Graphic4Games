@@ -130,6 +130,9 @@ void GraphicsApp::update(float deltaTime)
 	//shader effects editor
 	ImGui::Begin("Shader Index");
 	ImGui::DragInt("postProcessEffect", &m_postProcessEffect, 0.05f, 0, 11);
+	if (m_postProcessEffect == 1)
+		ImGui::DragFloat("BlurAmount", &m_blurStrength, 0.05f, 1, 11);
+	
 	if (m_postProcessEffect == 8) //pixel effect
 		ImGui::DragInt("pixelAmount", &m_pixelAmount, 0.5f, 10, 250);
 	ImGui::End();
@@ -140,6 +143,7 @@ void GraphicsApp::update(float deltaTime)
 	m_scene->SetCamera(m_camera[m_cameraIndex]);
 	m_camera[m_cameraIndex]->Update(deltaTime);
 
+	//update emitter
 	m_emitter->Update(deltaTime, m_camera[m_cameraIndex]->GetTransform(m_camera[m_cameraIndex]->GetPosition(),
 		glm::vec3(0), glm::vec3(1)));
 }
@@ -214,6 +218,7 @@ void GraphicsApp::draw()
 	m_postShader.bindUniform("colourTarget", 0);
 	m_postShader.bindUniform("postProcessTarget", m_postProcessEffect);
 	m_postShader.bindUniform("pixelAmount", m_pixelAmount);
+	m_postShader.bindUniform("blurStrength", m_blurStrength);
 	m_rendarTarget.getTarget(0).bind(0);
 	m_screenQuad.Draw();
 	
@@ -330,13 +335,21 @@ bool GraphicsApp::LaunchShaders()
 	//create the fullscreen quad for post precessing effects
 	m_screenQuad.InitialiseFullScreenQuad();
 
+
+
 	//add instances  ==================================================================
-	//for (int i = 0; i < 10; i++)
+	//spear instances ----
+	m_spearPosition = glm::vec3(20, 0, 0);
+
+	m_scene->AddInstance(new Instance(m_spearPosition, glm::vec3(0, 0, 0),
+		glm::vec3(1, 1, 1), &m_spearMesh, &m_normalMapShader));
+	//-------------------------
+
+	//gun instances
+	for (int i = 0; i < 10; i++)
 	{
-	///	m_scene->AddInstance(new Instance(glm::vec3(i * 2, 0, 0),glm::vec3(0, 0, 0),
-	//		glm::vec3(1, 1, 1), &m_spearMesh, &m_normalMapShader));
-		//m_scene->AddInstance(new Instance(glm::vec3(i * 4, 0, i * 5), glm::vec3(i * 20, 0, 0),
-	//		glm::vec3(1, 1, 1), &m_gunMesh, &m_normalMapShader));
+		m_scene->AddInstance(new Instance(glm::vec3(i * 4, 0, i * 5), glm::vec3(i * 20, 0, 0),
+			glm::vec3(1, 1, 1), &m_gunMesh, &m_normalMapShader));
 	}
 	//=================================================================================
 
