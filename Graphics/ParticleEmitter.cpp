@@ -2,7 +2,7 @@
 #include <glm/ext.hpp>
 #include <gl_core_4_4.h>
 
-ParticleEmitter::ParticleEmitter() : m_particles(nullptr), m_firstDead(0), m_maxParticles(0), m_position(0,0,0),
+ParticleEmitter::ParticleEmitter() : m_particles(nullptr), m_firstDead(0), m_maxParticles(0), m_position(0, 0, 0),
 m_vao(0), m_vbo(0), m_ibo(0), m_vertexData(nullptr)
 {
 
@@ -12,15 +12,15 @@ ParticleEmitter::~ParticleEmitter()
 {
 	delete[] m_particles;
 	delete[] m_vertexData;
-	
+
 	glDeleteVertexArrays(1, &m_vao);
 	glDeleteBuffers(1, &m_vbo);
 	glDeleteBuffers(1, &m_ibo);
 }
 
-void ParticleEmitter::Initialise(unsigned int a_maxParticles, unsigned int a_emitRate, 
-	float a_lifeTimeMin, float a_lifeTimeMax, float a_velocityMin, float a_velocityMax, 
-	float a_startSize, float a_endSize, 
+void ParticleEmitter::Initialise(unsigned int a_maxParticles, unsigned int a_emitRate,
+	float a_lifeTimeMin, float a_lifeTimeMax, float a_velocityMin, float a_velocityMax,
+	float a_startSize, float a_endSize,
 	const glm::vec4& a_startColour, const glm::vec4& a_endColour)
 {
 	//first we want to set up the emitters
@@ -28,20 +28,20 @@ void ParticleEmitter::Initialise(unsigned int a_maxParticles, unsigned int a_emi
 	m_emitRate = 1.0f / a_emitRate;
 
 	//then store all the arguments as our variables
-	m_startColour  = a_startColour;
-	m_endColour    = a_endColour;
+	m_startColour = a_startColour;
+	m_endColour = a_endColour;
 
-	m_startSize    = a_startSize;
-	m_endSize	   = a_endSize;
+	m_startSize = a_startSize;
+	m_endSize = a_endSize;
 
-	m_velocityMin  = a_velocityMin;
-	m_velocityMax  = a_velocityMax;
+	m_velocityMin = a_velocityMin;
+	m_velocityMax = a_velocityMax;
 
-	m_lifeSpanMin  = a_lifeTimeMin;
-	m_lifeSpanMax  = a_lifeTimeMax;
+	m_lifeSpanMin = a_lifeTimeMin;
+	m_lifeSpanMax = a_lifeTimeMax;
 
 	m_maxParticles = a_maxParticles;
-	
+
 	//next create an array of particlesl
 	m_particles = new Particle[m_maxParticles];
 	m_firstDead = 0;
@@ -61,7 +61,7 @@ void ParticleEmitter::Initialise(unsigned int a_maxParticles, unsigned int a_emi
 		indexData[i * 6 + 4] = i * 4 + 2;
 		indexData[i * 6 + 5] = i * 4 + 3;
 	}
-	
+
 	//finally, create the OpenGl buffers
 	glGenVertexArrays(1, &m_vao);
 	glBindVertexArray(m_vao);
@@ -90,11 +90,14 @@ void ParticleEmitter::Initialise(unsigned int a_maxParticles, unsigned int a_emi
 
 void ParticleEmitter::Emit()
 {
+	if (!m_shouldEmit)
+		return;
+
 	//check to see if there is an available particle
 	//for the system to emit
 	if (m_firstDead >= m_maxParticles)
 		return;
-	
+
 	//otherwise, return the first dead particle
 	Particle& particle = m_particles[m_firstDead++];
 
@@ -142,7 +145,7 @@ void ParticleEmitter::Update(float a_deltaTime, const glm::mat4& a_cameraTransfo
 	}
 
 	unsigned int quad = 0;
-	
+
 	//now we need to update all of the particles to make sure they work as billboard quads
 
 	for (unsigned int i = 0; i < m_firstDead; i++)
@@ -151,7 +154,7 @@ void ParticleEmitter::Update(float a_deltaTime, const glm::mat4& a_cameraTransfo
 
 		particle->lifetime += a_deltaTime;
 
-		if (particle->lifetime >= particle->lifeSpan) 
+		if (particle->lifetime >= particle->lifeSpan)
 		{	//if true, replace the last alive particle with this one
 			*particle = m_particles[m_firstDead - 1];
 			m_firstDead--;
@@ -169,16 +172,16 @@ void ParticleEmitter::Update(float a_deltaTime, const glm::mat4& a_cameraTransfo
 
 			//finally we will set up our quad using the correct position, colour and scale
 			float halfSize = particle->size * 0.5f;
-			m_vertexData[quad * 4].position = glm::vec4( halfSize,  halfSize, 0, 1);
+			m_vertexData[quad * 4].position = glm::vec4(halfSize, halfSize, 0, 1);
 			m_vertexData[quad * 4].colour = particle->colour;
 
-			m_vertexData[quad * 4 + 1].position = glm::vec4(-halfSize,  halfSize, 0, 1);
+			m_vertexData[quad * 4 + 1].position = glm::vec4(-halfSize, halfSize, 0, 1);
 			m_vertexData[quad * 4 + 1].colour = particle->colour;
 
 			m_vertexData[quad * 4 + 2].position = glm::vec4(-halfSize, -halfSize, 0, 1);
 			m_vertexData[quad * 4 + 2].colour = particle->colour;
 
-			m_vertexData[quad * 4 + 3].position = glm::vec4( halfSize, -halfSize, 0, 1);
+			m_vertexData[quad * 4 + 3].position = glm::vec4(halfSize, -halfSize, 0, 1);
 			m_vertexData[quad * 4 + 3].colour = particle->colour;
 
 			//set up our billboards transform

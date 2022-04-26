@@ -37,10 +37,13 @@ public:
 	void Draw();
 
 	glm::vec3 GetPosition() { return m_position; };
+	bool GetShouldEmit() { return m_shouldEmit; }
 
 	void SetPosition(glm::vec3 a_position) { m_position = a_position; }
-	//void SetColour(glm::vec4 a_colour) {m_colour = a_colour; }
+	void SetShouldEmit(bool a_shouldEmit) { m_shouldEmit = a_shouldEmit; }
 
+	void ToggleEmit() { m_shouldEmit = !m_shouldEmit; }
+	
 
 protected:
 
@@ -70,6 +73,8 @@ protected:
 	
 	glm::vec3 m_gravity = { 0, 0, 0 };
 	bool	  m_hasGravity = false;
+
+	bool	  m_shouldEmit = true;
 
 };
 

@@ -13,7 +13,7 @@ public:
 	float GetSpeed() { return m_speed; }
 
 
-	float m_speed = 1.5f;
+	float m_speed = 4.0f;
 	glm::vec3 up = glm::vec3(0, 1 ,0);
 
 };

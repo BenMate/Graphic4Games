@@ -54,16 +54,16 @@ void Scene::Update(float a_deltaTime)
 	{
 		Instance* instance = *it;
 
-		glm::vec3 pos = instance->GetPosition();
-		ImGui::DragFloat3(std::string("Position##").append(std::to_string(i)).c_str(), &pos[0], 0.4f, -20, 20); 
-		instance->SetPosition(pos);
+		glm::vec3 position = instance->GetPosition();
+		ImGui::DragFloat3(std::string("Position##").append(std::to_string(i)).c_str(), &position[0], 0.4f);
+		instance->SetPosition(position);
 		
 		glm::vec3 rotation = instance->GetRotation();
-		ImGui::DragFloat3(std::string("Rotation##").append(std::to_string(i)).c_str(), &rotation[0], 0.4f, -20, 20);
+		ImGui::DragFloat3(std::string("Rotation##").append(std::to_string(i)).c_str(), &rotation[0], 0.4f, -20, 100);
 		instance->SetRotation(rotation);
 
 		glm::vec3 scale = instance->GetScale();
-		ImGui::DragFloat3(std::string("Scale##").append(std::to_string(i)).c_str(), &scale[0], 0.4f, -20, 20);
+		ImGui::DragFloat3(std::string("Scale##").append(std::to_string(i)).c_str(), &scale[0], 0.4f, -10, 20);
 		instance->Setscale(scale);
 
 

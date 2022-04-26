@@ -121,6 +121,7 @@ protected:
 	ParticleEmitter* m_emitter;
 	glm::mat4		 m_particleTransform;
 
+
 	void InitialiseOurParticles();
 	void DrawOurParticles(glm::mat4 a_pvm);
 	

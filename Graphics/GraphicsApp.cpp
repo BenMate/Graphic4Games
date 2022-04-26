@@ -122,7 +122,7 @@ void GraphicsApp::update(float deltaTime)
 	if (m_flyCam != nullptr)
 	{
 		float speed = m_flyCam->GetSpeed();
-		ImGui::DragFloat("Fly Cam Speed", &speed, 0.1f, 1, 30);
+		ImGui::DragFloat("Fly Cam Speed", &speed, 0.1f, 1.0f, 50.0f);
 		m_flyCam->SetSpeed(speed);
 	}
 	ImGui::End();
@@ -137,16 +137,27 @@ void GraphicsApp::update(float deltaTime)
 		ImGui::DragInt("pixelAmount", &m_pixelAmount, 0.5f, 10, 250);
 	ImGui::End();
 	
+	//emittor
+	ImGui::Begin("Emitter Settings");
+
+	if (ImGui::Button("Press to Toggle Emitter"))
+		m_emitter->ToggleEmit();
+	
+	glm::vec3 pos = m_emitter->GetPosition();
+	ImGui::DragFloat3("Emitter Position", &pos[0], 0.1f);
+	m_emitter->SetPosition(pos);
+
+	ImGui::End();
+
 #pragma endregion
 
 	//set and update current camera
 	m_scene->SetCamera(m_camera[m_cameraIndex]);
 	m_camera[m_cameraIndex]->Update(deltaTime);
 
-	//update emitter
-	m_emitter->Update(deltaTime, m_camera[m_cameraIndex]->GetTransform(m_camera[m_cameraIndex]->GetPosition(),
-		glm::vec3(0), glm::vec3(1)));
-
+	//update emitter 
+	m_emitter->Update(deltaTime, m_camera[m_cameraIndex]->GetTransform(m_camera[m_cameraIndex]->GetPosition(), glm::vec3(0), glm::vec3(1)));
+	
 	m_scene->Update(deltaTime);
 }
 
