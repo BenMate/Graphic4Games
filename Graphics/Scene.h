@@ -15,6 +15,7 @@ struct Light
 	{
 		direction = pos;
 		colour = col * intensity;
+
 	}
 	
 	glm::vec3 direction;
@@ -31,6 +32,7 @@ public:
 
 	void AddInstance(Instance* a_instance);
 	void Draw();
+	void Update(float a_deltaTime);
 
 	Camera* GetCamera() { return m_camera; }
 	glm::vec2 GetWindowSize() { return m_windowSize; }
@@ -48,6 +50,7 @@ public:
 	{ m_pointLights.push_back(Light(a_direction, a_colour, a_intencity)); }
 
 	void SetCamera(Camera* a_camera) { m_camera = a_camera; }
+
 
 protected:
 

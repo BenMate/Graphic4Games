@@ -92,7 +92,6 @@ void GraphicsApp::update(float deltaTime)
 
 	// quit if we press escape
 	aie::Input* input = aie::Input::getInstance();
-
 	if (input->isKeyDown(aie::INPUT_KEY_ESCAPE))
 		quit();
 
@@ -100,15 +99,16 @@ void GraphicsApp::update(float deltaTime)
 	//GUI
 	ImGui::Begin("Light Settings");
 	ImGui::DragFloat3("Global Light Direction", &m_scene->GetGlobalLight().direction[0], 0.1f, -1.0f, 1.0f);
-	ImGui::DragFloat3("Global Light colour", &m_scene->GetGlobalLight().colour[0], 0.1, 0.0f, 2.0f);
+	ImGui::ColorEdit3("Global Light colour", &m_scene->GetGlobalLight().colour[0]);
 	ImGui::End();
 
 	//Point light gui
 	ImGui::Begin("PointLight Settings");
 	for (int i = 0; i < m_scene->GetNumLights(); i++)
 	{
-		ImGui::DragFloat3("Point Light Direction", &m_scene->GetPointLight()[i].direction[0], 0.1f, -1.0f, 1.0f);
-		ImGui::DragFloat3("Point Light colour", &m_scene->GetPointLight()[i].colour[0], 0.1, 0.0f, 2.0f);
+		ImGui::DragFloat3(std::string("Point Light Position##").append(std::to_string(i)).c_str(), &m_scene->GetPointLight()[i].direction[0], 0.1f);
+		ImGui::DragFloat3(std::string("Point Light colour##").append(std::to_string(i)).c_str(), &m_scene->GetPointLight()[i].colour[0], 0.1, 0.0f, 2.0f);
+		ImGui::Spacing();
 	}
 	ImGui::End();
 
@@ -146,6 +146,8 @@ void GraphicsApp::update(float deltaTime)
 	//update emitter
 	m_emitter->Update(deltaTime, m_camera[m_cameraIndex]->GetTransform(m_camera[m_cameraIndex]->GetPosition(),
 		glm::vec3(0), glm::vec3(1)));
+
+	m_scene->Update(deltaTime);
 }
 
 void GraphicsApp::draw()
@@ -189,6 +191,7 @@ void GraphicsApp::draw()
 #pragma endregion
 
 	m_scene->Draw();
+	Gizmos::draw(projectionMatrix * viewMatrix);
 
 	//particles
 	pvm = projectionMatrix * viewMatrix * m_particleTransform;
@@ -207,11 +210,11 @@ void GraphicsApp::draw()
 	// Draw the quad
 	m_gridTexture.bind(0);
 
-	//m_rendarTarget.getTarget(0).bind(0);
+	m_rendarTarget.getTarget(0).bind(0);
 	m_quadMesh.Draw();
 #pragma endregion
 
-	Gizmos::draw(projectionMatrix * viewMatrix);
+	
 	
 	// Bind the post processing shader and texture
 	m_postShader.bind();
@@ -219,6 +222,7 @@ void GraphicsApp::draw()
 	m_postShader.bindUniform("postProcessTarget", m_postProcessEffect);
 	m_postShader.bindUniform("pixelAmount", m_pixelAmount);
 	m_postShader.bindUniform("blurStrength", m_blurStrength);
+
 	m_rendarTarget.getTarget(0).bind(0);
 	m_screenQuad.Draw();
 	
@@ -335,25 +339,19 @@ bool GraphicsApp::LaunchShaders()
 	//create the fullscreen quad for post precessing effects
 	m_screenQuad.InitialiseFullScreenQuad();
 
+#pragma region AddingInstancing
 
-
-	//add instances  ==================================================================
-	//spear instances ----
 	m_spearPosition = glm::vec3(20, 0, 0);
-
 	m_scene->AddInstance(new Instance(m_spearPosition, glm::vec3(0, 0, 0),
 		glm::vec3(1, 1, 1), &m_spearMesh, &m_normalMapShader));
-	//-------------------------
 
-	//gun instances
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 2; i++)
 	{
 		m_scene->AddInstance(new Instance(glm::vec3(i * 4, 0, i * 5), glm::vec3(i * 20, 0, 0),
 			glm::vec3(1, 1, 1), &m_gunMesh, &m_normalMapShader));
 	}
-	//=================================================================================
 
-	
+#pragma endregion
 
 	return true;
 }

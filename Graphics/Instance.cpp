@@ -19,6 +19,9 @@ aie::ShaderProgram* a_shader) :
 	m_mesh(a_mesh), m_shader(a_shader)
 {
 	m_transform = MakeTransform(a_position, a_eulerAngles, a_scale);
+	m_position = a_position;
+	m_rotation = a_eulerAngles;
+	m_scale = a_scale;
 }
 
 void Instance::Draw(Scene* a_scene)
@@ -30,10 +33,10 @@ void Instance::Draw(Scene* a_scene)
 	auto pvm = a_scene->GetCamera()->GetProjectionMatrix
 	   (a_scene->GetWindowSize().x,
 		a_scene->GetWindowSize().y) *
-		a_scene->GetCamera()->GetViewMatrix() * m_transform;
+		a_scene->GetCamera()->GetViewMatrix() * GetTransform();
 
 	m_shader->bindUniform("ProjectionViewModel", pvm);
-	m_shader->bindUniform("ModelMatrix", m_transform);
+	m_shader->bindUniform("ModelMatrix", GetTransform());
 
 	//bind the lighting and camera uniforms
 	m_shader->bindUniform("AmbientColour", a_scene->GetAmbientLight());
@@ -62,4 +65,9 @@ glm::mat4 Instance::MakeTransform(glm::vec3 a_position,
 		 * glm::rotate(glm::mat4(1), glm::radians(a_eulerAngles.y), glm::vec3(0, 0, 1))
 		 * glm::rotate(glm::mat4(1), glm::radians(a_eulerAngles.x), glm::vec3(0, 0, 1))
 		 * glm::scale(glm::mat4(1),  a_Scale);
+}
+
+glm::mat4 Instance::GetTransform()
+{
+	return MakeTransform(GetPosition(), GetRotation(), GetScale());
 }
