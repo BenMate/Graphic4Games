@@ -16,6 +16,7 @@ public:
 		glm::vec2 texCoord;
 	};
 
+
 	void InitialiseQuad(); 
 	void InitialiseFullScreenQuad();
 
@@ -23,7 +24,6 @@ public:
 	void InitialiseBox();
 	void InitialisePryomid();
 	void initialiseGrid();
-
 	//==================
 	void Initialise(unsigned int a_vertexCount, const Vertex* a_vertices,
 		unsigned int a_indexCount = 0, unsigned int* a_indices = nullptr);

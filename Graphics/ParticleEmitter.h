@@ -22,7 +22,6 @@ struct ParticleVertex
 
 class ParticleEmitter
 {
-
 public:
 
 	ParticleEmitter();
@@ -44,7 +43,6 @@ public:
 
 	void ToggleEmit() { m_shouldEmit = !m_shouldEmit; }
 	
-
 protected:
 
 	Particle*		m_particles;

@@ -27,7 +27,6 @@ public:
 
 protected:
 
-
 	float m_size = 1;
 	float m_rotationSpeed = 1;
 	float m_rotation;

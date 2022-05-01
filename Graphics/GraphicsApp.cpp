@@ -132,17 +132,17 @@ void GraphicsApp::update(float deltaTime)
 	ImGui::DragInt("postProcessEffect", &m_postProcessEffect, 0.05f, 0, 11);
 	if (m_postProcessEffect == 1)
 		ImGui::DragFloat("BlurAmount", &m_blurStrength, 0.05f, 1, 11);
-	
+
 	if (m_postProcessEffect == 8) //pixel effect
 		ImGui::DragInt("pixelAmount", &m_pixelAmount, 0.5f, 10, 250);
 	ImGui::End();
-	
+
 	//emittor
 	ImGui::Begin("Emitter Settings");
 
 	if (ImGui::Button("Press to Toggle Emitter"))
 		m_emitter->ToggleEmit();
-	
+
 	glm::vec3 pos = m_emitter->GetPosition();
 	ImGui::DragFloat3("Emitter Position", &pos[0], 0.1f);
 	m_emitter->SetPosition(pos);
@@ -157,7 +157,7 @@ void GraphicsApp::update(float deltaTime)
 
 	//update emitter 
 	m_emitter->Update(deltaTime, m_camera[m_cameraIndex]->GetTransform(m_camera[m_cameraIndex]->GetPosition(), glm::vec3(0), glm::vec3(1)));
-	
+
 	m_scene->Update(deltaTime);
 }
 
@@ -225,8 +225,8 @@ void GraphicsApp::draw()
 	m_quadMesh.Draw();
 #pragma endregion
 
-	
-	
+
+
 	// Bind the post processing shader and texture
 	m_postShader.bind();
 	m_postShader.bindUniform("colourTarget", 0);
@@ -236,7 +236,7 @@ void GraphicsApp::draw()
 
 	m_rendarTarget.getTarget(0).bind(0);
 	m_screenQuad.Draw();
-	
+
 }
 
 bool GraphicsApp::LaunchShaders()
@@ -244,8 +244,8 @@ bool GraphicsApp::LaunchShaders()
 	//initialise render target
 	if (m_rendarTarget.initialise(1, getWindowWidth(), getWindowHeight()) == false)
 	{
-				printf("Render Target: error \n");
-				return false;
+		printf("Render Target: error \n");
+		return false;
 	}
 
 	//load vertex
@@ -325,23 +325,27 @@ bool GraphicsApp::LaunchShaders()
 
 	//transforms
 	m_quadMesh.InitialiseQuad();
-	m_quadTransform = { 10, 0, 0, 0,
+
+	m_quadTransform = { 10, 0, 0, 0,	
 						0, 10, 0, 0,
 						0, 0, 10, 0,
-						0, 0, 0, 1 }; 
-	//this is 10 units large
+						0, 0, 0, 1 }; //this is 10 units large
+	
 	m_bunnyTransform = { 2, 0, 0, 0,
 						 0, 2, 0, 0,
 						 0, 0, 2, 0,
 						 0, 0, 0, 2 };
+
 	m_spearTransform = { 1, 0, 0, 0,
 						 0, 1, 0, 0,
-					     0, 0, 1, 0,
-					 	 0, 0, 0, 1 };
+						 0, 0, 1, 0,
+						 0, 0, 0, 1 };
+
 	m_gunTransform = { 0.3, 0, 0, 0,
 					   0, 0.3, 0, 0,
 					   0, 0, 0.3, 0,
 					   0, 0, 0, 1 };
+
 	m_particleTransform = { 1, 0, 0, 0,
 						 0, 1, 0, 0,
 						 0, 0, 1, 0,

@@ -13,7 +13,6 @@ namespace aie
 
 }
 
-
 class Instance
 {
 public:
@@ -37,7 +36,6 @@ public:
 	void SetPosition(glm::vec3 a_position) { m_position = a_position; }
 	void SetRotation(glm::vec3 a_rotation) { m_rotation = a_rotation; }
 	void Setscale(glm::vec3 a_scale) { m_scale = a_scale; }
-
 
 protected:
 
