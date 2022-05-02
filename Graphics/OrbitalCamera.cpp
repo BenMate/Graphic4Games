@@ -15,6 +15,11 @@ void OrbitalCamera::Update(float deltaTime)
 {
 
 	m_rotation += (m_rotationalDir == RotationalDirection::CW ? m_rotationSpeed : -m_rotationSpeed) * deltaTime;
-	m_position = glm::vec3(cos(m_rotation), 0, sin(m_rotation)) * m_distanceFromCenter;
+	m_position = glm::vec3(cos(m_rotation), 0.3f, sin(m_rotation)) * m_distanceFromCenter;
+
+	//orbital camera test
+	//glm::mat4 view = glm::lookAt(glm::vec3(sin(m_rotation),0.0f,cos(m_rotation)) + glm::vec3(0), glm::vec3(0), glm::vec3(0,1,0));
+	
+	m_theta += 0.72f;
 
 }

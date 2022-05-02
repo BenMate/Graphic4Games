@@ -77,7 +77,7 @@ protected:
 	//render data
 	aie::RenderTarget m_rendarTarget;
 
-	int m_postProcessEffect = 1;
+	int m_postProcessEffect = 0;
 
 	int m_pixelAmount = 100;
 	float m_blurStrength = 1.0f;
@@ -124,5 +124,7 @@ protected:
 	//Emittor functions
 	void InitialiseOurParticles();
 	void DrawOurParticles(glm::mat4 a_pvm);
+
+	static glm::mat4 MakeTransform(glm::vec3 a_position, glm::vec3 a_eulerAngles, glm::vec3 a_Scale);
 	
 };

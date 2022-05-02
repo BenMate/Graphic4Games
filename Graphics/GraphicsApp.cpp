@@ -54,8 +54,10 @@ bool GraphicsApp::startup()
 		light, m_ambientLight);
 
 	//add a point light into the scene
-	m_scene->AddPointLight(glm::vec3(5, 3, 0), glm::vec3(1, 0, 0), 50);
-	m_scene->AddPointLight(glm::vec3(-5, 3, 0), glm::vec3(0, 0, 1), 50);
+	//red light
+	m_scene->AddPointLight(glm::vec3(4.5, 3, -3), glm::vec3(1, 0, 0), 50);
+	//blue point light
+	m_scene->AddPointLight(glm::vec3(4, 1, -2.5), glm::vec3(0, 0, 1), 50);
 
 	InitialiseOurParticles();
 
@@ -189,15 +191,6 @@ void GraphicsApp::draw()
 	m_phongShader.bindUniform("ProjectionViewModel", pvm);
 	m_phongShader.bindUniform("ModelMatrix", m_bunnyTransform);
 
-	m_marbleTexture.bind(0);
-	m_phongShader.bindUniform("seamlessTexture", 0);
-
-	m_hatchingTexture.bind(1);
-	m_phongShader.bindUniform("hatchingTexture", 1);
-
-	m_rampTexture.bind(2);
-	m_phongShader.bindUniform("rampTexture", 2);
-
 	m_bunnyMesh.draw();
 #pragma endregion
 
@@ -225,8 +218,6 @@ void GraphicsApp::draw()
 	m_quadMesh.Draw();
 #pragma endregion
 
-
-
 	// Bind the post processing shader and texture
 	m_postShader.bind();
 	m_postShader.bindUniform("colourTarget", 0);
@@ -250,7 +241,7 @@ bool GraphicsApp::LaunchShaders()
 
 	//load vertex
 	m_shader.loadShader(aie::eShaderStage::VERTEX, "./shaders/simple.vert");
-	m_phongShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/phongExt.vert");
+	m_phongShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/phong.vert");
 	m_texturedShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/textured.vert");
 	m_normalMapShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/normalMap.vert");
 	m_postShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/advancedPost.vert");
@@ -258,7 +249,7 @@ bool GraphicsApp::LaunchShaders()
 
 	//load fragment
 	m_shader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/simple.frag");
-	m_phongShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/phongExt.frag");
+	m_phongShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/phong.frag");
 	m_texturedShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/textured.frag");
 	m_normalMapShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/normalMap.frag");
 	m_postShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/advancedPost.frag");
@@ -326,45 +317,26 @@ bool GraphicsApp::LaunchShaders()
 	//transforms
 	m_quadMesh.InitialiseQuad();
 
-	m_quadTransform = { 10, 0, 0, 0,	
-						0, 10, 0, 0,
-						0, 0, 10, 0,
-						0, 0, 0, 1 }; //this is 10 units large
+	m_quadTransform = MakeTransform(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), glm::vec3(10, 1, 10)); //this is 10 units large
+
+	m_bunnyTransform = MakeTransform(glm::vec3(5, 1, 5), glm::vec3(0, 0, 0), glm::vec3(0.3f, 0.3f, 0.3f));
+
+	m_particleTransform = MakeTransform(glm::vec3(1, 1, 1), glm::vec3(0, 0, 0), glm::vec3(1, 1, 1));
 	
-	m_bunnyTransform = { 2, 0, 0, 0,
-						 0, 2, 0, 0,
-						 0, 0, 2, 0,
-						 0, 0, 0, 2 };
-
-	m_spearTransform = { 1, 0, 0, 0,
-						 0, 1, 0, 0,
-						 0, 0, 1, 0,
-						 0, 0, 0, 1 };
-
-	m_gunTransform = { 0.3, 0, 0, 0,
-					   0, 0.3, 0, 0,
-					   0, 0, 0.3, 0,
-					   0, 0, 0, 1 };
-
-	m_particleTransform = { 1, 0, 0, 0,
-						 0, 1, 0, 0,
-						 0, 0, 1, 0,
-						 0, 0, 0, 1 };
 
 	//create the fullscreen quad for post precessing effects
 	m_screenQuad.InitialiseFullScreenQuad();
 
 #pragma region AddingInstancing
 
-	m_spearPosition = glm::vec3(20, 0, 0);
-	m_scene->AddInstance(new Instance(m_spearPosition, glm::vec3(0, 0, 0),
+	//spear instance
+	m_scene->AddInstance(new Instance(glm::vec3(20, 0, 0), glm::vec3(0, 0, 0),
 		glm::vec3(1, 1, 1), &m_spearMesh, &m_normalMapShader));
 
-	for (int i = 0; i < 2; i++)
-	{
-		m_scene->AddInstance(new Instance(glm::vec3(i * 4, 0, i * 5), glm::vec3(i * 20, 0, 0),
-			glm::vec3(1, 1, 1), &m_gunMesh, &m_normalMapShader));
-	}
+	//gun instances
+	m_scene->AddInstance(new Instance(glm::vec3(5, 0, -5), glm::vec3(0, 0, 0),
+		glm::vec3(0.3, 0.3, 0.3), &m_gunMesh, &m_normalMapShader));
+
 
 #pragma endregion
 
@@ -375,7 +347,7 @@ void GraphicsApp::InitialiseOurParticles()
 {
 	m_emitter = new ParticleEmitter();
 	m_emitter->Initialise(1000, 500, 0.1, 1.0f, 1.0f, 10.0f, 2.0f, 0.1f, glm::vec4(0, 1, 1, 1), glm::vec4(1, 1, 0, 1));
-
+	m_emitter->SetPosition(glm::vec3(17, 1, 17));
 }
 
 void GraphicsApp::DrawOurParticles(glm::mat4 a_pvm)
@@ -383,4 +355,14 @@ void GraphicsApp::DrawOurParticles(glm::mat4 a_pvm)
 	m_particleShader.bind();
 	m_particleShader.bindUniform("ProjectionViewModel", a_pvm);
 	m_emitter->Draw();
+}
+
+glm::mat4 GraphicsApp::MakeTransform(glm::vec3 a_position,
+	glm::vec3 a_eulerAngles, glm::vec3 a_Scale)
+{
+	return glm::translate(glm::mat4(1), a_position) *
+		glm::rotate(glm::mat4(1),   glm::radians(a_eulerAngles.z), glm::vec3(0, 0, 1))
+		* glm::rotate(glm::mat4(1), glm::radians(a_eulerAngles.y), glm::vec3(0, 1, 0))
+		* glm::rotate(glm::mat4(1), glm::radians(a_eulerAngles.x), glm::vec3(1, 0, 0))
+		* glm::scale(glm::mat4(1), a_Scale);
 }

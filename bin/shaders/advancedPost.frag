@@ -67,9 +67,25 @@ vec4 Pixel(vec2 texCoord)
     return colour;
 }
 
+vec4 GreyScale(vec2 texCoord){
+    vec4 baseColour = texture(colourTarget, texCoord);
+    float greyColour = (baseColour.r + baseColour.g + baseColour.b) / 3;
+    vec4 greyScale = vec4(greyColour, greyColour, greyColour, 1.0f);
+    return greyScale;
+}
+
 vec4 Invert(vec2 texCoord)
-{  
-    return texture(colourTarget, 1-texCoord);
+{   
+    vec4 baseColour = texture(colourTarget, texCoord);
+
+    vec4 inverted = vec4(
+        1.0f - baseColour.r,
+        1.0f - baseColour.g,
+        1.0f - baseColour.b,
+        1.0f
+    );
+
+    return inverted;
 }
 
 void main()
@@ -113,14 +129,14 @@ void main()
             FragColour = Sepia(texCoord);
             break;
         }
-        case 5: // Scanless
+        case 5: // Scan lines
         {
             FragColour = Default(texCoord);
             break;
         }
         case 6: // gray Scale
         {
-            FragColour = Default(texCoord);
+            FragColour = GreyScale(texCoord);
             break;
         }
         case 7: // Invert
